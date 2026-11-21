@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="build" content="20261121191320">
+<meta name="build" content="20261121192236">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -275,6 +275,10 @@ details>summary+*{margin-top:12px}
 details>*:last-child{margin-bottom:13px}
 details details{background:var(--panel)}
 .save{display:flex;gap:8px}
+.savestat{margin-top:8px;padding:9px 11px;border-radius:11px;font-size:12px;line-height:1.45;background:color-mix(in srgb,#16a34a 13%,transparent);color:var(--text);border:1px solid color-mix(in srgb,#16a34a 40%,transparent)}
+.savestat.bad{background:color-mix(in srgb,#dc2626 12%,transparent);border-color:color-mix(in srgb,#dc2626 40%,transparent)}
+.savestat b{font-weight:700}
+#bSave.done{background:#16a34a;border-color:transparent}
 .save .btn{flex:1}
 table{border-collapse:collapse;width:100%;font-size:12px;margin-top:6px}
 td{border-top:1px solid var(--line);padding:3px 5px;vertical-align:top;word-break:break-word}
@@ -459,9 +463,11 @@ table.ex td.new .was{display:none}
       </div>
 
       <div>
-        <div class="save"><button type="button" class="btn primary big" id="bSave" title="Als Bilddatei speichern – mit EXIF (S)"><svg class="i lg" aria-hidden="true"><use href="#i-save"/></svg>Speichern</button><button type="button" class="btn big" id="bCopy" title="Bild in die Zwischenablage kopieren"><svg class="i lg" aria-hidden="true"><use href="#i-copy"/></svg>Kopieren</button></div>
+        <div class="save"><button type="button" class="btn accent big" id="bSave" title="Schreibt die EXIF-Daten in die Datei und speichert sie (S)"><svg class="i lg" aria-hidden="true"><use href="#i-save"/></svg><span id="bSaveTxt">EXIF ändern &amp; speichern</span></button></div>
+        <div class="save" style="margin-top:8px"><button type="button" class="btn" id="bCopy" title="Bild in die Zwischenablage kopieren (ohne EXIF)"><svg class="i lg" aria-hidden="true"><use href="#i-copy"/></svg>Nur Bild kopieren</button></div>
+        <div class="savestat" id="saveStat" role="status" aria-live="polite" hidden></div>
         <button type="button" class="btn" id="bAll" style="width:100%;margin-top:8px" hidden>Alle Fotos einzeln speichern</button>
-        <p class="muted" style="font-size:11.5px;margin:8px 0 0">Speichern behält die EXIF-Daten. Kopieren überträgt nur das Bild – ohne EXIF.</p>
+        <p class="muted" style="font-size:11.5px;margin:8px 0 0">Der Knopf schreibt die EXIF-Daten in die Datei, speichert sie und prüft danach, was wirklich drinsteht. „Nur Bild kopieren“ überträgt kein EXIF.</p>
       </div>
 
       <div>
@@ -1535,14 +1541,27 @@ $('#nameStyle').addEventListener('change',()=>{ files.forEach(f=>{ f.nameCustom=
 let dl=null; (async()=>{ try{ if(window.claude&&typeof window.claude.use==='function') dl=await window.claude.use('downloads'); }catch(e){ dl=null; } })();
 async function saveBlob(name, bytes, mime){
   const blob=new Blob([bytes],{type:mime});
-  if(dl){ try{ await dl.save({filename:name,data:blob}); toast('Gespeichert: '+name); }catch(e){ if(e&&e.code==='declined') return; toast(e&&e.code==='rate_limited'?'Bitte kurz warten und erneut versuchen':'Speichern nicht möglich: '+(e&&e.message||e),true); } return; }
+  if(dl){ try{ await dl.save({filename:name,data:blob}); }catch(e){ if(e&&e.code==='declined') return; toast(e&&e.code==='rate_limited'?'Bitte kurz warten und erneut versuchen':'Speichern nicht möglich: '+(e&&e.message||e),true); } return; }
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),10000);
 }
 async function guarded(btn,label,fn){ if(busy) return; busy=true; const old=btn.innerHTML; btn.disabled=true; btn.textContent=label; try{ await fn(); }catch(e){ toast('Fehler: '+e.message,true); } finally{ busy=false; btn.disabled=false; btn.innerHTML=old; } }
-$('#bSave').onclick=()=>{ if(files[cur]) guarded($('#bSave'),'…',async()=>saveBlob(finalName(files[cur]), await renderFile(files[cur]), 'image/jpeg')); };
-$('#bAll').onclick=()=>{ if(files.length>1) guarded($('#bAll'),'…',async()=>{ const used=new Set();
+function readBack(bytes){ try{ const d=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength); let p=2,tags={}; while(p<d.byteLength-4){ if(d.getUint8(p)!==0xFF) break; const m=d.getUint8(p+1), len=d.getUint16(p+2); if(m===0xE1&&d.getUint32(p+4)===0x45786966){ tags=parseTiff(d,p+10,p+2+len); break; } p+=2+len; } return tags; }catch(e){ return {}; } }
+function checkSaved(bytes,name){ /* liest die frisch erzeugte Datei wieder ein und prüft, was wirklich drinsteht */
+  const tags=readBack(bytes), keys=Object.keys(tags), v=tagsToVals(tags), strip=$('#stripAll').checked;
+  const dev=[v.make,v.model].filter(Boolean).join(' '), dt=v.dateOriginal?fmtDate(v.dateOriginal):'', gps=nz(v.lat)&&nz(v.lon);
+  const ok=strip?keys.length===0:keys.length>0;
+  const st=$('#saveStat'); st.hidden=false; st.classList.toggle('bad',!ok);
+  st.innerHTML=ok?(strip?`<b>✓ Gespeichert: ${name}</b><br>Alle EXIF-Daten wurden entfernt (in der Datei geprüft).`:`<b>✓ Gespeichert: ${name}</b><br>${keys.length} EXIF-Einträge in der Datei geprüft${dev?` · ${dev}`:''}${dt?` · ${dt}`:''} · GPS ${gps?'ja':'nein'}`):`<b>Achtung: ${name}</b><br>In der gespeicherten Datei wurden keine EXIF-Daten gefunden.`;
+  return ok; }
+function flashSaved(ok){ const b=$('#bSave'); b.classList.toggle('done',ok); $('#bSaveTxt').textContent=ok?'✓ EXIF geschrieben':'Fehler beim Schreiben'; clearTimeout(flashSaved._t); flashSaved._t=setTimeout(()=>{ b.classList.remove('done'); syncSaveLabel(); },2600); }
+function syncSaveLabel(){ $('#bSaveTxt').textContent=$('#stripAll').checked?'Metadaten entfernen & speichern':'EXIF ändern & speichern'; }
+$('#stripAll').addEventListener('change',syncSaveLabel); syncSaveLabel();
+$('#bSave').onclick=()=>{ const f=files[cur]; if(!f||busy) return; busy=true; const btn=$('#bSave'); btn.disabled=true; $('#bSaveTxt').textContent='EXIF wird geschrieben …';
+  (async()=>{ try{ const name=finalName(f), bytes=await renderFile(f); await saveBlob(name,bytes,'image/jpeg'); const ok=checkSaved(bytes,name); toast(ok?'Gespeichert: '+name:'Keine EXIF-Daten in der Datei',!ok); flashSaved(ok); }catch(e){ toast('Fehler: '+e.message,true); flashSaved(false); } finally{ busy=false; btn.disabled=false; } })(); };
+$('#bAll').onclick=()=>{ if(files.length>1) guarded($('#bAll'),'…',async()=>{ const used=new Set(); let okN=0;
   for(let i=0;i<files.length;i++){ const f=files[i]; $('#bAll').textContent=`${i+1}/${files.length}`; let n=finalName(f), k=1; while(used.has(n.toLowerCase())) n=finalName(f).replace(/\.jpg$/i,m=>`_${k++}${m}`); used.add(n.toLowerCase());
-    await saveBlob(n, await renderFile(f), 'image/jpeg'); await new Promise(r=>setTimeout(r,350)); } }); };
+    const bytes=await renderFile(f); await saveBlob(n,bytes,'image/jpeg'); if(checkSaved(bytes,n)) okN++; await new Promise(r=>setTimeout(r,350)); }
+  const st=$('#saveStat'); st.hidden=false; st.classList.toggle('bad',okN<files.length); st.innerHTML=`<b>✓ ${okN} von ${files.length} Fotos gespeichert</b><br>EXIF-Daten in jeder Datei geprüft.`; }); };
 $('#bAll').addEventListener('click',()=>{});
 // Kopieren: Zwischenablage kennt nur PNG – das Bild wird so übertragen, wie es gespeichert würde (ohne EXIF)
 $('#bCopy').onclick=()=>{ const f=files[cur]; if(!f||busy) return;
