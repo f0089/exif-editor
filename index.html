@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="build" content="20261121171908">
+<meta name="build" content="20261121191320">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -343,6 +343,10 @@ table.ex td.new .was{display:none}
 .exmore>.fg{margin-bottom:6px}
 .exgl{margin-top:10px;margin-bottom:6px;opacity:.85}
 
+.fnbox{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.fnrow{display:flex;align-items:center;gap:6px}
+.fnrow input{flex:1}
+.fnext{font-size:13px;color:var(--muted);font-weight:600}
 .qrow{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
 .fc.qs{flex-direction:row;align-items:center;padding:9px 40px 9px 11px;min-height:36px}
 .fc.qs .fl{font-size:12.5px;color:var(--text);font-weight:650;padding:0}
@@ -448,6 +452,10 @@ table.ex td.new .was{display:none}
         <select id="preset" hidden aria-hidden="true" tabindex="-1"><option value="">– Handy wählen –</option></select>
         <label class="check"><input type="checkbox" id="allTog"> Für alle Fotos (Handy, Format, Würfeln)</label>
         <div class="qrow"><button type="button" class="fc qs on" id="qDate" aria-pressed="true" title="Datum und Uhrzeit in die Datei schreiben"><span class="fl">Datum &amp; Zeit</span><i class="sw" aria-hidden="true"></i></button><button type="button" class="fc qs on" id="qGps" aria-pressed="true" title="GPS-Daten in die Datei schreiben"><span class="fl">GPS-Daten</span><i class="sw" aria-hidden="true"></i></button></div>
+        <div class="fnbox"><label for="fileName">Dateiname beim Speichern</label>
+          <div class="fnrow"><input id="fileName" type="text" autocomplete="off" spellcheck="false" aria-label="Dateiname"><span class="fnext" id="fileExt">.jpg</span></div>
+          <select id="nameStyle" aria-label="Namensmuster" title="So heißt die Datei, wenn du sie speicherst"><option value="cam">Wie die Handy-Kamera</option><option value="telegram">Wie Telegram (photo_Datum_Zeit)</option><option value="whatsapp">Wie WhatsApp (IMG-Datum-WA0001)</option><option value="orig">Originalname der Datei</option></select>
+        </div>
       </div>
 
       <div>
@@ -1015,7 +1023,7 @@ CITIES.forEach((c,i)=>{ const o=document.createElement('option'); o.value='city:
 { const t=new Date(), f=new Date(+t-730*864e5), ds=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#rFrom').value=ds(f); $('#rTo').value=ds(t); }
 
 // Einstellungen merken
-const PREF_IDS=['fillMode','rDev','rExp','rGps','rDate','rSeries','rLoc','rBrand','fQual','fmtOn','fRotate','nowOnLoad','stripXmp','stripAll','allTog'];
+const PREF_IDS=['fillMode','rDev','rExp','rGps','rDate','rSeries','rLoc','rBrand','fQual','fmtOn','fRotate','nowOnLoad','stripXmp','stripAll','allTog','nameStyle'];
 function savePrefs(){ try{ const p={plat:plat.get()}; PREF_IDS.forEach(id=>{ const el=$('#'+id); p[id]=el.type==='checkbox'?el.checked:el.value; }); localStorage.setItem('exifEditorPrefs2',JSON.stringify(p)); }catch(e){} }
 try{ const p=JSON.parse(localStorage.getItem('exifEditorPrefs2')||'null'); if(p){ if(p.plat) plat.set(p.plat); PREF_IDS.forEach(id=>{ if(id in p){ const el=$('#'+id); if(el.type==='checkbox') el.checked=!!p[id]; else el.value=p[id]; } }); } }catch(e){}
 function syncOpts(){ filterModels(); $('#brandWrap').style.visibility=plat.get()==='ios'?'hidden':'visible'; $('#rFrom').disabled=$('#rTo').disabled=!$('#rDate').checked; savePrefs(); }
@@ -1043,7 +1051,7 @@ async function addFiles(fl){
       const uw=bmp.width, uh=bmp.height, ps=Math.min(1,1800/Math.max(uw,uh));
       const prev=document.createElement('canvas'); prev.width=Math.round(uw*ps); prev.height=Math.round(uh*ps);
       const px=prev.getContext('2d'); px.imageSmoothingQuality='high'; px.drawImage(bmp,0,0,prev.width,prev.height); bmp.close();
-      files.push({name:file.name, buf, url:URL.createObjectURL(file), tags:info.tags, origW:info.w, origH:info.h, uw, uh, prev, orig, vals, rot:0, ang:0, autoZ:true, crop:{fmt:'3:4',cx:.5,cy:.5,z:1,tier:'auto'}});
+      files.push({name:file.name, loaded:new Date(), imgNo:nextImgNo(), waNo:files.length+1, ms:Math.floor(Math.random()*1000), nameCustom:null, buf, url:URL.createObjectURL(file), tags:info.tags, origW:info.w, origH:info.h, uw, uh, prev, orig, vals, rot:0, ang:0, autoZ:true, crop:{fmt:'3:4',cx:.5,cy:.5,z:1,tier:'auto'}});
     }catch(e){ bad++; }
   }
   if (bad) toast(`${bad} Datei(en) übersprungen – nur Bilddateien (HEIC vorher in JPEG umwandeln)`, true);
@@ -1328,7 +1336,7 @@ function render(){
   const has=cur>=0&&!!files[cur];
   $('#empty').hidden=has; $('#emptyCard').hidden=has; $('#stageCard').hidden=!has; $('#infoCard').hidden=!has; $('#studio').hidden=!has; $('#toolbar').hidden=!has; $('#exifCard').hidden=!has; $('#fmtbar').hidden=!has; $('#hero').hidden=!has; $('#models').hidden=!has;
   $$('#models .m').forEach(b=>b.disabled=!has);
-  [...$$('[data-f]'),$('#preset'),$('#bRand'),$('#nowBtn'),$('#gpsClear'),$('#resetBtn'),$('#bSave')].forEach(el=>el.disabled=!has);
+  [...$$('[data-f]'),$('#preset'),$('#bRand'),$('#nowBtn'),$('#gpsClear'),$('#resetBtn'),$('#bSave'),$('#fileName'),$('#nameStyle')].forEach(el=>el.disabled=!has);
   $('#bAll').hidden=files.length<2; $('#bCopy').disabled=!has;
   if (!has) return;
   const f=files[cur];
@@ -1345,7 +1353,7 @@ function refresh(){ const f=files[cur]; if(!f) return;
   $('#zoom').value=f.crop.z; syncAng(f); const fmtOn=$('#fmtOn').checked; $('#fmtbar').style.opacity=fmtOn?1:.4;
   const v=f.vals, pl=nearCity(v); $('#placeName').textContent=pl||'kein GPS';
   const ml=$('#mapLink'); if(nz(v.lat)&&nz(v.lon)){ ml.hidden=false; ml.href=`https://www.openstreetmap.org/?mlat=${numv(v.lat)}&mlon=${numv(v.lon)}#map=15/${numv(v.lat)}/${numv(v.lon)}`; } else ml.hidden=true;
-  updateHero(outInfo(f)); drawStage(); refreshOut(); renderExif(); }
+  updateHero(outInfo(f)); drawStage(); refreshOut(); renderExif(); syncName(); }
 function refreshOut(){
   const f=files[cur]; if(!f) return; const o=outInfo(f), out=$('#out'); out.innerHTML='';
   const has24=!!(o.r&&o.r.lo); $('#tier').hidden=$('#tierSep').hidden=!has24; if(has24) tierSeg.set(o.tier);
@@ -1501,6 +1509,29 @@ async function renderFile(f){
   return out;
 }
 const outName=n=>n.replace(/\.(jpe?g)$/i,'')+'.jpg';
+/* ---------- Dateinamen wie vom Handy ---------- */
+const nextImgNo=()=>{ let n=NaN; try{ n=parseInt(localStorage.getItem('exifEditorImgNo'),10); }catch(e){} if(!(n>0)) n=1000+Math.floor(Math.random()*7000); n+=1+(Math.random()<.25?Math.floor(Math.random()*3):0); try{ localStorage.setItem('exifEditorImgNo',String(n)); }catch(e){} return n; };
+function nameParts(d){ return {Y:String(d.getFullYear()),M:pad(d.getMonth()+1),D:pad(d.getDate()),h:pad(d.getHours()),m:pad(d.getMinutes()),s:pad(d.getSeconds())}; }
+function nameBase(f){ /* liefert {base,ext} nach gewähltem Muster */
+  const st=$('#nameStyle').value, v=f.vals, br=brandOf(v);
+  const m=/^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d)(?::(\d\d))?/.exec(v.dateOriginal||'');
+  const t=m?{Y:m[1],M:m[2],D:m[3],h:m[4],m:m[5],s:m[6]||'00'}:nameParts(new Date());
+  const ld=nameParts(f.loaded||new Date());
+  if(st==='orig') return {base:f.name.replace(/\.[^.]+$/,''),ext:'.jpg'};
+  if(st==='telegram') return {base:`photo_${ld.Y}-${ld.M}-${ld.D}_${ld.h}-${ld.m}-${ld.s}`,ext:'.jpg'};
+  if(st==='whatsapp') return {base:`IMG-${ld.Y}${ld.M}${ld.D}-WA${String(f.waNo||1).padStart(4,'0')}`,ext:'.jpg'};
+  if(br==='apple') return {base:'IMG_'+String(((f.imgNo-1)%9999)+1).padStart(4,'0'),ext:'.JPG'};
+  if(br==='samsung') return {base:`${t.Y}${t.M}${t.D}_${t.h}${t.m}${t.s}`,ext:'.jpg'};
+  if(br==='google') return {base:`PXL_${t.Y}${t.M}${t.D}_${t.h}${t.m}${t.s}${String(f.ms??0).padStart(3,'0')}`,ext:'.jpg'};
+  return {base:`IMG_${t.Y}${t.M}${t.D}_${t.h}${t.m}${t.s}`,ext:'.jpg'};
+}
+const safeName=n=>String(n).replace(/[\\/:*?"<>|\u0000-\u001f]/g,'').replace(/\.(jpe?g)$/i,'').trim();
+function finalName(f){ const nb=nameBase(f), c=f.nameCustom!=null?safeName(f.nameCustom):''; return (c||nb.base)+nb.ext; }
+function syncName(){ const f=files[cur], inp=$('#fileName'); if(!f){ inp.value=''; return; } const nb=nameBase(f); $('#fileExt').textContent=nb.ext; if(document.activeElement!==inp) inp.value=f.nameCustom!=null?f.nameCustom:nb.base; inp.placeholder=nb.base; }
+$('#fileName').addEventListener('input',e=>{ const f=files[cur]; if(!f) return; const v=e.target.value; f.nameCustom=v.trim()?v:null; });
+$('#fileName').addEventListener('blur',()=>syncName());
+$('#nameStyle').addEventListener('change',()=>{ files.forEach(f=>{ f.nameCustom=null; }); syncName(); });
+
 let dl=null; (async()=>{ try{ if(window.claude&&typeof window.claude.use==='function') dl=await window.claude.use('downloads'); }catch(e){ dl=null; } })();
 async function saveBlob(name, bytes, mime){
   const blob=new Blob([bytes],{type:mime});
@@ -1508,9 +1539,9 @@ async function saveBlob(name, bytes, mime){
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),10000);
 }
 async function guarded(btn,label,fn){ if(busy) return; busy=true; const old=btn.innerHTML; btn.disabled=true; btn.textContent=label; try{ await fn(); }catch(e){ toast('Fehler: '+e.message,true); } finally{ busy=false; btn.disabled=false; btn.innerHTML=old; } }
-$('#bSave').onclick=()=>{ if(files[cur]) guarded($('#bSave'),'…',async()=>saveBlob(outName(files[cur].name), await renderFile(files[cur]), 'image/jpeg')); };
+$('#bSave').onclick=()=>{ if(files[cur]) guarded($('#bSave'),'…',async()=>saveBlob(finalName(files[cur]), await renderFile(files[cur]), 'image/jpeg')); };
 $('#bAll').onclick=()=>{ if(files.length>1) guarded($('#bAll'),'…',async()=>{ const used=new Set();
-  for(let i=0;i<files.length;i++){ const f=files[i]; $('#bAll').textContent=`${i+1}/${files.length}`; let n=outName(f.name), k=1; while(used.has(n.toLowerCase())) n=outName(f.name).replace(/\.jpg$/,`_${k++}.jpg`); used.add(n.toLowerCase());
+  for(let i=0;i<files.length;i++){ const f=files[i]; $('#bAll').textContent=`${i+1}/${files.length}`; let n=finalName(f), k=1; while(used.has(n.toLowerCase())) n=finalName(f).replace(/\.jpg$/i,m=>`_${k++}${m}`); used.add(n.toLowerCase());
     await saveBlob(n, await renderFile(f), 'image/jpeg'); await new Promise(r=>setTimeout(r,350)); } }); };
 $('#bAll').addEventListener('click',()=>{});
 // Kopieren: Zwischenablage kennt nur PNG – das Bild wird so übertragen, wie es gespeichert würde (ohne EXIF)
