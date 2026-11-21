@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="shortcut icon" href="favicon.ico">
+<meta name="build" content="20261121163954">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#4f46e5">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -1574,6 +1578,19 @@ function platNewest(){ const f=files[cur]; if(!f) return; const pl=plat.get(), p
   if(!(p&&(pl==='both'||(pl==='ios')===(p.g==='Apple')))) applyPreset(newestIdx()); }
 </script>
 <style>@media (display-mode:standalone){body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}}</style>
-<script>if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){ addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }</script>
+<script>
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){ addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+/* Auto-Update: prüft version.txt; ohne geladene Fotos wird sofort neu geladen, sonst erscheint ein Hinweis */
+(function(){ const mine=(document.querySelector('meta[name=build]')||{}).content; if(!mine||!/^https?:$/.test(location.protocol)) return; let shown=false;
+  function banner(){ if(document.getElementById('upd')) return; const d=document.createElement('div'); d.id='upd'; d.setAttribute('role','status');
+    d.style.cssText='position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:99999;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;border-radius:14px;background:#4f46e5;color:#fff;font:600 13px system-ui,sans-serif;box-shadow:0 10px 30px -8px rgba(79,70,229,.6)';
+    d.innerHTML='<span>Neue Version verfügbar</span>'; const b=document.createElement('button'); b.type='button'; b.textContent='Jetzt aktualisieren';
+    b.style.cssText='border:0;border-radius:9px;padding:7px 12px;font:700 12.5px system-ui,sans-serif;background:#fff;color:#4f46e5;cursor:pointer'; b.onclick=()=>location.reload(); d.appendChild(b); document.body.appendChild(d); }
+  async function check(){ if(shown) return; try{ const r=await fetch('version.txt?'+Date.now(),{cache:'no-store'}); if(!r.ok) return; const v=(await r.text()).trim(); if(!v||v===mine) return; shown=true;
+      let last=0; try{ last=+sessionStorage.getItem('ee_rl')||0; }catch(e){}
+      if(typeof files!=='undefined' && !files.length && Date.now()-last>90000){ try{ sessionStorage.setItem('ee_rl',String(Date.now())); }catch(e){} location.reload(); } else banner(); }catch(e){} }
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); }); addEventListener('focus',check); addEventListener('online',check); setInterval(check,120000); setTimeout(check,4000);
+})();
+</script>
 </body>
 </html>
