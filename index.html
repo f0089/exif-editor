@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="build" content="20261121171046">
+<meta name="build" content="20261121171908">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -1416,6 +1416,8 @@ $('#exAll').onclick=()=>exBulk(true); $('#exNone').onclick=()=>exBulk(false);
 const QDATE=['date','offset','subsec'], QGPS=['gps','alt','gpsx'];
 const qToggle=ids=>{ const on=ids.every(i=>EXSET.off.has(i)); ids.forEach(i=>{ if(on) EXSET.off.delete(i); else EXSET.off.add(i); }); saveExSet(); renderExif(); };
 $('#qDate').onclick=()=>qToggle(QDATE); $('#qGps').onclick=()=>qToggle(QGPS);
+syncQuick(false); /* gespeicherten Zustand der Schnellschalter sofort zeigen */
+$('#exMode').querySelectorAll('button').forEach(b=>b.classList.toggle('on',(b.dataset.m==='real')===EXSET.real));
 function syncQuick(strip){ const f=files[cur]; [['#qDate',QDATE],['#qGps',QGPS]].forEach(([s,ids])=>{ const b=$(s), off=EXSET.off.has(ids[0]); b.classList.toggle('on',!off); b.classList.toggle('off',off); b.setAttribute('aria-pressed',!off); b.disabled=!f||strip; }); }
 function renderExif(){ const f=files[cur]; if(!f){ syncQuick(false); return; } syncQuick($('#stripAll').checked);
   const strip=$('#stripAll').checked, fmtOn=$('#fmtOn').checked, o=outInfo(f);
