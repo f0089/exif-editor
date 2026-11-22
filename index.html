@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="build" content="20261123000837">
+<meta name="build" content="20261123001449">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -365,6 +365,8 @@ table.ex td.new .was{display:none}
 .qsw input:focus-visible+.sw{outline:2px solid var(--accent);outline-offset:2px}
 .qmode{display:flex}.qmode button{flex:1;white-space:nowrap}
 .qcard.off .qbody,.qcard.off .qmode{opacity:.42;pointer-events:none}
+.qsize{font-size:12px;color:var(--muted);padding:8px 11px;border-radius:12px;background:var(--field)}
+.qsize b{color:var(--text)}
 .qpane{display:none}.qpane.on{display:block}
 .qnote{margin:0;font-size:12px;line-height:1.5;color:var(--muted)}
 .qtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
@@ -501,6 +503,7 @@ table.ex td.new .was{display:none}
           </div>
         </div>
         <p class="qnote" id="qNote"></p>
+        <div class="qsize" id="qSize" aria-live="polite"></div>
       </div>
       <div class="exifcard" id="exifCard" hidden>
         <div class="ex-head"><h3><svg class="i " aria-hidden="true"><use href="#i-doc"/></svg>EXIF-Daten</h3><span class="chip ok" id="exCount"></span><div class="exctl"><div class="seg" id="exMode" title="Welche Felder geschrieben werden"><button type="button" data-m="real" class="on">Realitätsnah</button><button type="button" data-m="simple">Einfach</button></div><span class="exbulk"><button type="button" class="lnk" id="exAll" title="Alle Felder aktivieren">Alle an</button><button type="button" class="lnk" id="exNone" title="Alle Felder abwählen">Alle aus</button></span></div></div>
@@ -1277,9 +1280,9 @@ function paintFill(x,img,rx,ry,rw,rh,mode,blurPx){
 function bgOf(f){ if(f._bgSrc!==f.prev){ const m=26, k=m/Math.max(f.prev.width,f.prev.height), c=document.createElement('canvas'); c.width=Math.max(2,Math.round(f.prev.width*k)); c.height=Math.max(2,Math.round(f.prev.height*k));
   const g=c.getContext('2d'); g.imageSmoothingQuality='high'; g.drawImage(f.prev,0,0,c.width,c.height); f._bg=c; f._bgSrc=f.prev; } return f._bg; }
 function drawPlain(x,CW,CH,f,o){
-  const pv=f.prev, A=o.W/o.H, padT=24, padS=24; let fh=CH-padT-padS, fw=fh*A; if(fw>CW-2*padS){ fw=CW-2*padS; fh=fw/A; }
+  const pv=f.prev, pd=pvq(f), A=o.W/o.H, padT=24, padS=24; let fh=CH-padT-padS, fw=fh*A; if(fw>CW-2*padS){ fw=CW-2*padS; fh=fw/A; }
   const fx=(CW-fw)/2, fy=padT+(CH-padT-padS-fh)/2, r=cropRect(f,pv.width,pv.height,o), s=fw/r.w;
-  x.imageSmoothingQuality='high'; if(outside(r,pv.width,pv.height)) paintFill(x,pv,fx,fy,fw,fh,$('#fillMode').value,14); x.save(); x.translate(fx+fw/2,fy+fh/2); x.rotate((r.a||0)*Math.PI/180); x.drawImage(pv,-(r.x+r.w/2)*s,-(r.y+r.h/2)*s,pv.width*s,pv.height*s); x.restore();
+  x.imageSmoothingQuality='high'; if(outside(r,pv.width,pv.height)) paintFill(x,pv,fx,fy,fw,fh,$('#fillMode').value,14); x.save(); x.translate(fx+fw/2,fy+fh/2); x.rotate((r.a||0)*Math.PI/180); x.drawImage(pd,-(r.x+r.w/2)*s,-(r.y+r.h/2)*s,pv.width*s,pv.height*s); x.restore();
   x.fillStyle='rgba(10,10,12,.7)'; x.beginPath(); x.rect(0,0,CW,CH); const rad=Math.min(fw,fh)*0.03; x.roundRect(fx,fy,fw,fh,rad); x.fill('evenodd');
   x.strokeStyle='rgba(255,255,255,.9)'; x.lineWidth=2; x.beginPath(); x.roundRect(fx,fy,fw,fh,rad); x.stroke();
   x.strokeStyle='rgba(255,255,255,.22)'; x.lineWidth=1; for(let k=1;k<3;k++){ x.beginPath(); x.moveTo(fx+fw*k/3,fy); x.lineTo(fx+fw*k/3,fy+fh); x.moveTo(fx,fy+fh*k/3); x.lineTo(fx+fw,fy+fh*k/3); x.stroke(); }
@@ -1294,7 +1297,7 @@ function drawStage(){
   const x=stage.getContext('2d'); x.setTransform(dpr,0,0,dpr,0,0); x.clearRect(0,0,CW,CH);
   const o=outInfo(f), pv=f.prev, fm=FMTS[f.crop.fmt], land=!fm.portrait&&fm.ratio!=='1:1', st=$('#studio');
   st.classList.toggle('flat',!$('#fmtOn').checked||viewSeg.get()==='photo'); st.classList.toggle('land',land); document.querySelector('.main').classList.toggle('land',land);
-  if(!$('#fmtOn').checked){ const s=Math.min((CW-40)/pv.width,(CH-40)/pv.height); x.save(); x.translate(CW/2,CH/2); x.rotate((f.ang||0)*Math.PI/180); x.drawImage(pv,-pv.width*s/2,-pv.height*s/2,pv.width*s,pv.height*s); x.restore(); view=null; return; }
+  if(!$('#fmtOn').checked){ const s=Math.min((CW-40)/pv.width,(CH-40)/pv.height); x.save(); x.translate(CW/2,CH/2); x.rotate((f.ang||0)*Math.PI/180); x.drawImage(pvq(f),-pv.width*s/2,-pv.height*s/2,pv.width*s,pv.height*s); x.restore(); view=null; return; }
   if(viewSeg.get()==='photo'){ drawPlain(x,CW,CH,f,o); return; }
 
   // Ziel-Gerät und Übergangsanimation
@@ -1344,7 +1347,7 @@ function drawStage(){
   const r=cropRect(f,pv.width,pv.height,o), s=pwO/r.w;
   x.translate(vx+lw/2,vy+lh/2); x.rotate(-th); x.imageSmoothingQuality='high';
   if(outside(r,pv.width,pv.height)) paintFill(x,pv,-pwO/2,-phO/2,pwO,phO,$('#fillMode').value,Math.max(6,pwO*.03));
-  x.rotate((r.a||0)*Math.PI/180); x.drawImage(pv,-(r.x+r.w/2)*s,-(r.y+r.h/2)*s,pv.width*s,pv.height*s); x.restore();
+  x.rotate((r.a||0)*Math.PI/180); x.drawImage(pvq(f),-(r.x+r.w/2)*s,-(r.y+r.h/2)*s,pv.width*s,pv.height*s); x.restore();
   { const ccx=vx+lw/2, ccy=vy+lh/2; view={fx:cx+ccx*co-ccy*si-pwO/2, fy:cy+ccx*si+ccy*co-phO/2, fw:pwO, fh:phO, s, r}; }
   // Abdunklung unten + Kamera-Oberfläche
   const sg=x.createLinearGradient(0,sy1-.7*u,0,sy1); sg.addColorStop(0,'rgba(0,0,0,0)'); sg.addColorStop(1,'rgba(0,0,0,.6)'); x.fillStyle=sg; x.fillRect(scx,sy1-.7*u,u,.7*u);
@@ -1369,7 +1372,7 @@ function drawStage(){
       x.fillStyle=on?yel:'rgba(255,255,255,.75)'; x.fillText(t,px,modeY); }); }
   // Auslöser, Vorschaubild, Kamera wechseln
   x.strokeStyle='#fff'; x.lineWidth=u*.012; x.beginPath(); x.arc(0,shutY,u*.118,0,7); x.stroke(); x.fillStyle='#fff'; x.beginPath(); x.arc(0,shutY,u*.093,0,7); x.fill();
-  { const ts=u*.135, tx=-.33*u-ts/2, ty2=shutY-ts/2, m=Math.min(pv.width,pv.height); x.save(); x.beginPath(); x.roundRect(tx,ty2,ts,ts,ts*.22); x.clip(); x.drawImage(pv,(pv.width-m)/2,(pv.height-m)/2,m,m,tx,ty2,ts,ts); x.restore();
+  { const ts=u*.135, tx=-.33*u-ts/2, ty2=shutY-ts/2, m=Math.min(pv.width,pv.height); x.save(); x.beginPath(); x.roundRect(tx,ty2,ts,ts,ts*.22); x.clip(); x.drawImage(pvq(f),(pv.width-m)/2,(pv.height-m)/2,m,m,tx,ty2,ts,ts); x.restore();
     x.strokeStyle='rgba(255,255,255,.5)'; x.lineWidth=u*.004; x.beginPath(); x.roundRect(tx,ty2,ts,ts,ts*.22); x.stroke();
     const fx2=.33*u; x.fillStyle='rgba(255,255,255,.16)'; x.beginPath(); x.arc(fx2,shutY,u*.066,0,7); x.fill();
     x.strokeStyle='rgba(255,255,255,.95)'; x.lineWidth=u*.01; x.lineCap='round'; x.beginPath(); x.arc(fx2,shutY,u*.03,.3*Math.PI,1.55*Math.PI); x.stroke(); x.beginPath(); x.arc(fx2,shutY,u*.03,1.3*Math.PI,2.55*Math.PI); x.stroke(); }
@@ -1435,12 +1438,12 @@ function refresh(){ const f=files[cur]; if(!f) return;
   $('#zoom').value=f.crop.z; syncAng(f); const fmtOn=$('#fmtOn').checked; $('#fmtbar').style.opacity=fmtOn?1:.4;
   const v=f.vals, pl=nearCity(v); $('#placeName').textContent=pl||'kein GPS';
   const ml=$('#mapLink'); if(nz(v.lat)&&nz(v.lon)){ ml.hidden=false; ml.href=`https://www.openstreetmap.org/?mlat=${numv(v.lat)}&mlon=${numv(v.lon)}#map=15/${numv(v.lat)}/${numv(v.lon)}`; } else ml.hidden=true;
-  updateHero(outInfo(f)); drawStage(); refreshOut(); renderExif(); syncName(); renderQ(); }
+  updateHero(outInfo(f)); drawStage(); refreshOut(); renderExif(); syncName(); renderQ(); schedulePrev(); }
 function refreshOut(){
   const f=files[cur]; if(!f) return; const o=outInfo(f), out=$('#out'); out.innerHTML='';
   const has24=!!(o.r&&o.r.lo); $('#tier').hidden=$('#tierSep').hidden=!has24; if(has24) tierSeg.set(o.tier);
   const add=(t,c)=>{ const s=document.createElement('span'); s.className='chip '+(c||''); s.textContent=t; out.appendChild(s); };
-  if(!$('#fmtOn').checked){ add(`Bild bleibt unverändert · ${f.origW}×${f.origH}`); return; }
+  if(!$('#fmtOn').checked){ const same=!QSET.on&&!f.rot&&!f.ang; add(same?`Bild bleibt unverändert · ${f.origW}×${f.origH}`:`Auflösung bleibt ${f.origW}×${f.origH}`,same?'':'ok'); if(!same){ const ql=qualityFor(f); add(ql.off?'Komprimierung aus · 100 %':ql.auto?`JPEG-Tabellen wie ${ql.prof.n}`:`JPEG-Qualität ${ql.label}`); } add(`${fmtDate(f.vals.dateOriginal)||'kein Datum'}`); return; }
   if(!o.p){ add('Kein bekanntes Handy – rechts eines wählen oder würfeln','warn'); }
   add(`Ergebnis ${o.W}×${o.H} px · ${(o.W*o.H/1e6).toFixed(1).replace('.',',')} MP`,'ok');
   if(o.portrait&&$('#fRotate').checked) add('gespeichert quer + Ausrichtung 6, wie am Handy');
@@ -1666,8 +1669,31 @@ function renderQ(){
   $('#qRange').value=QSET.pct; if(document.activeElement!==$('#qNum')) $('#qNum').value=QSET.pct;
   const rf=$('#qRefs'); rf.innerHTML=''; QREFS.forEach(r=>{ const b=document.createElement('button'); b.type='button'; b.className=Math.abs(r.p-QSET.pct)<=1?'near':''; b.innerHTML=`<b>${r.p} %</b>${r.t}`; b.onclick=()=>{ QSET.pct=r.p; QSET.mode='manual'; saveQ(); afterTierChange(); }; rf.appendChild(b); });
   const fm=$('#fmtOn').checked;
-  $('#qNote').textContent=!QSET.on?(fm?'Aus: Das Foto wird mit höchster Qualität (100 %) gespeichert, ohne zusätzliche Komprimierung.':'Aus: Das Foto bleibt unverändert, es wird nichts neu komprimiert.'):(fm||files[cur].rot||files[cur].ang?'Gilt beim Speichern. Höhere Zahl = bessere Qualität und größere Datei.':'Hinweis: Ohne Formatanpassung oder Drehen bleibt das Original-JPEG unverändert, dann wirkt die Einstellung nicht.');
+  $('#qNote').textContent=!QSET.on?(fm?'Aus: Das Foto wird mit höchster Qualität (100 %) gespeichert, ohne zusätzliche Komprimierung.':'Aus: Das Foto bleibt unverändert, es wird nichts neu komprimiert.'):'Das Foto wird beim Speichern mit dieser Einstellung neu komprimiert. Die Vorschau links zeigt das Ergebnis. Höhere Zahl = bessere Qualität, größere Datei.';
 }
+
+/* ---------- Vorschau mit echter Kompression + Dateigröße ---------- */
+const pvq=f=>(f.pq&&f.pqSrc===f.prev)?f.pq:f.prev;
+let pqTok=0, pqTimer=0, szTimer=0, szTok=0;
+async function updatePrevQ(){
+  const f=files[cur]; if(!f) return; const tok=++pqTok, ql=qualityFor(f);
+  if(ql.off){ if(f.pq){ f.pq=null; drawStage(); } return; }
+  const key=ql.label+'|'+f.prev.width+'x'+f.prev.height;
+  if(f.pq&&f.pqSrc===f.prev&&f.pqKey===key) return;
+  try{ /* Kompression in Anzeigegröße (max. 1000 px), damit die Wirkung im Sucher sichtbar ist */
+    const W=f.prev.width, H=f.prev.height, k=Math.min(1,1000/Math.max(W,H)), sm=document.createElement('canvas'); sm.width=Math.max(8,Math.round(W*k)); sm.height=Math.max(8,Math.round(H*k));
+    const sx=sm.getContext('2d',{willReadFrequently:true}); sx.imageSmoothingQuality='high'; sx.drawImage(f.prev,0,0,sm.width,sm.height);
+    const bytes=await encodeJpegProfile(sm,ql.prof), bmp=await createImageBitmap(new Blob([bytes],{type:'image/jpeg'}));
+    if(tok!==pqTok||files[cur]!==f){ bmp.close(); return; }
+    const out=document.createElement('canvas'); out.width=W; out.height=H; const ox=out.getContext('2d'); ox.imageSmoothingQuality='high'; ox.drawImage(bmp,0,0,W,H); bmp.close();
+    f.pq=out; f.pqSrc=f.prev; f.pqKey=key; drawStage(); }catch(e){}
+}
+async function updateSizeEst(){
+  const f=files[cur], el=$('#qSize'); if(!f||!el) return; const tok=++szTok;
+  try{ const bytes=await renderFile(f); if(tok!==szTok||files[cur]!==f) return;
+    const mb=b=>(b/1048576).toFixed(1).replace('.',',')+' MB'; el.innerHTML=`Dateigröße beim Speichern: <b>≈ ${mb(bytes.length)}</b> · Original ${mb(f.buf.byteLength??f.buf.length)}`; }catch(e){ el.textContent=''; }
+}
+function schedulePrev(){ clearTimeout(pqTimer); pqTimer=setTimeout(updatePrevQ,120); clearTimeout(szTimer); const el=$('#qSize'); if(el&&files[cur]) el.innerHTML='Dateigröße wird berechnet …'; szTimer=setTimeout(updateSizeEst,900); }
 $('#qOn').addEventListener('change',e=>{ QSET.on=e.target.checked; saveQ(); renderQ(); refresh(); });
 $('#qMode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) qSetMode(b.dataset.m); });
 $('#qRange').addEventListener('input',e=>{ const was=QSET.mode; QSET.mode='manual'; QSET.pct=+e.target.value; saveQ(); if(was==='tier') filterModels(); renderQ(); refresh(); });
@@ -1676,7 +1702,7 @@ $('#qNum').addEventListener('blur',()=>{ $('#qNum').value=QSET.pct; });
 
 async function renderFile(f){
   const strip=$('#stripAll').checked, xmp=$('#stripXmp').checked, fmtOn=$('#fmtOn').checked;
-  if(!fmtOn && !f.rot && !f.ang) return rebuildJpeg(f.buf, strip?null:buildExif(f.vals,f.origW,f.origH), xmp, strip);
+  if(!fmtOn && !f.rot && !f.ang && !QSET.on) return rebuildJpeg(f.buf, strip?null:buildExif(f.vals,f.origW,f.origH), xmp, strip);
   const bmp=await createImageBitmap(new Blob([f.buf],{type:'image/jpeg'}),{imageOrientation:'from-image'});
   let img=bmp;
   if(f.rot){ const k=f.rot, c=mkCanvas(k%2?bmp.height:bmp.width,k%2?bmp.width:bmp.height), cx=c.getContext('2d'); cx.translate(c.width/2,c.height/2); cx.rotate(k*Math.PI/2); cx.drawImage(bmp,-bmp.width/2,-bmp.height/2); bmp.close(); img=c; }
