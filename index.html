@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="build" content="20261121192236">
+<meta name="build" content="20261122193708">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -511,7 +511,7 @@ table.ex td.new .was{display:none}
           <label class="check"><input type="checkbox" id="rSeries" checked> Mehrere Fotos als Serie (gleiches Handy, fortlaufende Zeit)</label>
           <label>Ort beim Würfeln<select id="rLoc"><option value="rnd:AT">Zufällige Stadt in Österreich</option><option value="rnd:DACH">Zufällige Stadt in AT / DE / CH</option><option value="rnd:EU">Zufällige Stadt in Europa</option><option value="none">Kein GPS</option><option value="keep">GPS nicht verändern</option><optgroup label="Bestimmte Stadt" id="rCities"></optgroup></select></label>
           <div class="g2"><label id="brandWrap">Android-Marke<select id="rBrand"><option value="alle">Alle</option><option>Samsung</option><option>Google</option><option>Xiaomi</option><option value="Andere">Andere</option></select></label>
-            <label>JPEG-Qualität<select id="fQual"><option value="0.95">95 %</option><option value="0.92" selected>92 %</option><option value="0.85">85 %</option></select></label></div>
+            <label>JPEG-Qualität<select id="fQuality"><option value="auto" selected>Automatisch – wie das Handy</option><option value="0.97">97 %</option><option value="0.95">95 %</option><option value="0.92">92 %</option><option value="0.85">85 %</option></select></label></div>
           <div class="g2"><label>Datum von<input type="date" id="rFrom"></label><label>bis<input type="date" id="rTo"></label></div>
           <label>Leere Ränder beim Auszoomen<select id="fillMode"><option value="black">Schwarz</option><option value="white">Weiß</option><option value="blur">Unscharf (Foto weichgezeichnet)</option></select></label>
           <label class="check"><input type="checkbox" id="fmtOn" checked> Handy-Format anwenden (sonst Bild unverändert)</label>
@@ -1029,11 +1029,11 @@ CITIES.forEach((c,i)=>{ const o=document.createElement('option'); o.value='city:
 { const t=new Date(), f=new Date(+t-730*864e5), ds=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#rFrom').value=ds(f); $('#rTo').value=ds(t); }
 
 // Einstellungen merken
-const PREF_IDS=['fillMode','rDev','rExp','rGps','rDate','rSeries','rLoc','rBrand','fQual','fmtOn','fRotate','nowOnLoad','stripXmp','stripAll','allTog','nameStyle'];
+const PREF_IDS=['fillMode','rDev','rExp','rGps','rDate','rSeries','rLoc','rBrand','fQuality','fmtOn','fRotate','nowOnLoad','stripXmp','stripAll','allTog','nameStyle'];
 function savePrefs(){ try{ const p={plat:plat.get()}; PREF_IDS.forEach(id=>{ const el=$('#'+id); p[id]=el.type==='checkbox'?el.checked:el.value; }); localStorage.setItem('exifEditorPrefs2',JSON.stringify(p)); }catch(e){} }
 try{ const p=JSON.parse(localStorage.getItem('exifEditorPrefs2')||'null'); if(p){ if(p.plat) plat.set(p.plat); PREF_IDS.forEach(id=>{ if(id in p){ const el=$('#'+id); if(el.type==='checkbox') el.checked=!!p[id]; else el.value=p[id]; } }); } }catch(e){}
 function syncOpts(){ filterModels(); $('#brandWrap').style.visibility=plat.get()==='ios'?'hidden':'visible'; $('#rFrom').disabled=$('#rTo').disabled=!$('#rDate').checked; savePrefs(); }
-PREF_IDS.forEach(id=>$('#'+id).addEventListener('change',()=>{ syncOpts(); if(['fmtOn','fRotate','fillMode','stripAll'].includes(id)) refresh(); }));
+PREF_IDS.forEach(id=>$('#'+id).addEventListener('change',()=>{ syncOpts(); if(['fmtOn','fRotate','fillMode','stripAll','fQuality'].includes(id)) refresh(); }));
 $('#plat').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; plat.set(b.dataset.v); syncOpts(); platNewest(); });
 
 /* ---------- Laden ---------- */
@@ -1371,6 +1371,7 @@ function refreshOut(){
   if(o.r) add(o.t.src==='belegt'?'Auflösung belegt':o.t.src==='abgeleitet'?'Auflösung abgeleitet':'Auflösung geschätzt', o.t.src==='belegt'?'ok':o.t.src==='geschätzt'?'warn':'');
   const rr=cropRect(f,f.uw,f.uh,o), up=o.W/rr.w; if(up>1.05) add(`wird ${up.toFixed(1).replace('.',',')}× hochskaliert`,'warn');
   if(f.ang) add('Gedreht um '+Math.abs(f.ang).toFixed(1).replace('.',',')+'° '+(f.ang>0?'im Uhrzeigersinn':'dagegen')); if(outside(rr,f.uw,f.uh)) add('Leere Ränder: '+({black:'schwarz',white:'weiß',blur:'unscharf'}[$('#fillMode').value]),'warn');
+  { const ql=qualityFor(f); add(ql.auto?`JPEG-Qualität ${Math.round(ql.q*100)} % · wie ${ql.n}`:`JPEG-Qualität ${Math.round(ql.q*100)} %`); }
   add(`${fmtDate(f.vals.dateOriginal)||'kein Datum'}`);
 }
 
@@ -1493,6 +1494,9 @@ $('#bRand').onclick=()=>{ if(files.length) doRandom(); };
 
 /* ---------- Speichern ---------- */
 const mkCanvas=(w,h)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; };
+/* JPEG-Qualität je Handy-Marke: grobe Werte aus typischen Dateigrößen (Samsung große Dateien, iPhone und Pixel sparsamer) */
+const QUAL={apple:{q:.91,n:'iPhone'},samsung:{q:.96,n:'Samsung'},google:{q:.90,n:'Pixel'},android:{q:.93,n:'Android'}};
+function qualityFor(f){ const sel=$('#fQuality').value; if(sel!=='auto') return {q:+sel,auto:false}; const b=QUAL[brandOf(f.vals)]||QUAL.android; return {q:b.q,auto:true,n:b.n}; }
 const toBlobP=(c,q)=>new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('JPEG-Erzeugung fehlgeschlagen')),'image/jpeg',q));
 async function renderFile(f){
   const strip=$('#stripAll').checked, xmp=$('#stripXmp').checked, fmtOn=$('#fmtOn').checked;
@@ -1508,7 +1512,7 @@ async function renderFile(f){
   ux.save(); ux.translate(o.W/2,o.H/2); ux.rotate((r.a||0)*Math.PI/180); ux.drawImage(src,-(r.x+r.w/2)*sc,-(r.y+r.h/2)*sc,tw,th); ux.restore();
   let st=up, orient=1;
   if(o.portrait&&$('#fRotate').checked){ st=mkCanvas(o.H,o.W); const sx=st.getContext('2d'); sx.translate(0,o.W); sx.rotate(-Math.PI/2); sx.drawImage(up,0,0); orient=6; }
-  const jpg=await (await toBlobP(st,+$('#fQual').value)).arrayBuffer();
+  const jpg=await (await toBlobP(st,qualityFor(f).q)).arrayBuffer();
   const v={...f.vals, orientation:String(orient)};
   const out=rebuildJpeg(jpg, strip?null:buildExif(v,st.width,st.height), true, strip);
   if(img.close) img.close(); [...tmp,up,st,img].forEach(c=>{ if(c.width!==undefined&&c.getContext){ c.width=c.height=0; } });
@@ -1551,7 +1555,7 @@ function checkSaved(bytes,name){ /* liest die frisch erzeugte Datei wieder ein u
   const dev=[v.make,v.model].filter(Boolean).join(' '), dt=v.dateOriginal?fmtDate(v.dateOriginal):'', gps=nz(v.lat)&&nz(v.lon);
   const ok=strip?keys.length===0:keys.length>0;
   const st=$('#saveStat'); st.hidden=false; st.classList.toggle('bad',!ok);
-  st.innerHTML=ok?(strip?`<b>✓ Gespeichert: ${name}</b><br>Alle EXIF-Daten wurden entfernt (in der Datei geprüft).`:`<b>✓ Gespeichert: ${name}</b><br>${keys.length} EXIF-Einträge in der Datei geprüft${dev?` · ${dev}`:''}${dt?` · ${dt}`:''} · GPS ${gps?'ja':'nein'}`):`<b>Achtung: ${name}</b><br>In der gespeicherten Datei wurden keine EXIF-Daten gefunden.`;
+  st.innerHTML=ok?(strip?`<b>✓ Gespeichert: ${name}</b><br>Alle EXIF-Daten wurden entfernt (in der Datei geprüft).`:`<b>✓ Gespeichert: ${name}</b><br>${keys.length} EXIF-Einträge in der Datei geprüft · ${(bytes.length/1048576).toFixed(1).replace('.',',')} MB${dev?` · ${dev}`:''}${dt?` · ${dt}`:''} · GPS ${gps?'ja':'nein'}`):`<b>Achtung: ${name}</b><br>In der gespeicherten Datei wurden keine EXIF-Daten gefunden.`;
   return ok; }
 function flashSaved(ok){ const b=$('#bSave'); b.classList.toggle('done',ok); $('#bSaveTxt').textContent=ok?'✓ EXIF geschrieben':'Fehler beim Schreiben'; clearTimeout(flashSaved._t); flashSaved._t=setTimeout(()=>{ b.classList.remove('done'); syncSaveLabel(); },2600); }
 function syncSaveLabel(){ $('#bSaveTxt').textContent=$('#stripAll').checked?'Metadaten entfernen & speichern':'EXIF ändern & speichern'; }
