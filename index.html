@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="build" content="20261122193708">
+<meta name="build" content="20261122194848">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -511,7 +511,7 @@ table.ex td.new .was{display:none}
           <label class="check"><input type="checkbox" id="rSeries" checked> Mehrere Fotos als Serie (gleiches Handy, fortlaufende Zeit)</label>
           <label>Ort beim Würfeln<select id="rLoc"><option value="rnd:AT">Zufällige Stadt in Österreich</option><option value="rnd:DACH">Zufällige Stadt in AT / DE / CH</option><option value="rnd:EU">Zufällige Stadt in Europa</option><option value="none">Kein GPS</option><option value="keep">GPS nicht verändern</option><optgroup label="Bestimmte Stadt" id="rCities"></optgroup></select></label>
           <div class="g2"><label id="brandWrap">Android-Marke<select id="rBrand"><option value="alle">Alle</option><option>Samsung</option><option>Google</option><option>Xiaomi</option><option value="Andere">Andere</option></select></label>
-            <label>JPEG-Qualität<select id="fQuality"><option value="auto" selected>Automatisch – wie das Handy</option><option value="0.97">97 %</option><option value="0.95">95 %</option><option value="0.92">92 %</option><option value="0.85">85 %</option></select></label></div>
+            <label>JPEG-Qualität<select id="fQuality"><option value="auto" selected>Automatisch – wie das Handy (echte Tabellen)</option><option value="0.97">97 %</option><option value="0.95">95 %</option><option value="0.92">92 %</option><option value="0.85">85 %</option></select></label></div>
           <div class="g2"><label>Datum von<input type="date" id="rFrom"></label><label>bis<input type="date" id="rTo"></label></div>
           <label>Leere Ränder beim Auszoomen<select id="fillMode"><option value="black">Schwarz</option><option value="white">Weiß</option><option value="blur">Unscharf (Foto weichgezeichnet)</option></select></label>
           <label class="check"><input type="checkbox" id="fmtOn" checked> Handy-Format anwenden (sonst Bild unverändert)</label>
@@ -1371,7 +1371,7 @@ function refreshOut(){
   if(o.r) add(o.t.src==='belegt'?'Auflösung belegt':o.t.src==='abgeleitet'?'Auflösung abgeleitet':'Auflösung geschätzt', o.t.src==='belegt'?'ok':o.t.src==='geschätzt'?'warn':'');
   const rr=cropRect(f,f.uw,f.uh,o), up=o.W/rr.w; if(up>1.05) add(`wird ${up.toFixed(1).replace('.',',')}× hochskaliert`,'warn');
   if(f.ang) add('Gedreht um '+Math.abs(f.ang).toFixed(1).replace('.',',')+'° '+(f.ang>0?'im Uhrzeigersinn':'dagegen')); if(outside(rr,f.uw,f.uh)) add('Leere Ränder: '+({black:'schwarz',white:'weiß',blur:'unscharf'}[$('#fillMode').value]),'warn');
-  { const ql=qualityFor(f); add(ql.auto?`JPEG-Qualität ${Math.round(ql.q*100)} % · wie ${ql.n}`:`JPEG-Qualität ${Math.round(ql.q*100)} %`); }
+  { const ql=qualityFor(f); add(ql.auto?`JPEG-Tabellen wie ${ql.n}`:`JPEG-Qualität ${Math.round(ql.q*100)} %`); }
   add(`${fmtDate(f.vals.dateOriginal)||'kein Datum'}`);
 }
 
@@ -1496,7 +1496,72 @@ $('#bRand').onclick=()=>{ if(files.length) doRandom(); };
 const mkCanvas=(w,h)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; return c; };
 /* JPEG-Qualität je Handy-Marke: grobe Werte aus typischen Dateigrößen (Samsung große Dateien, iPhone und Pixel sparsamer) */
 const QUAL={apple:{q:.91,n:'iPhone'},samsung:{q:.96,n:'Samsung'},google:{q:.90,n:'Pixel'},android:{q:.93,n:'Android'}};
-function qualityFor(f){ const sel=$('#fQuality').value; if(sel!=='auto') return {q:+sel,auto:false}; const b=QUAL[brandOf(f.vals)]||QUAL.android; return {q:b.q,auto:true,n:b.n}; }
+function qualityFor(f){ const sel=$('#fQuality').value; if(sel!=='auto') return {q:+sel,auto:false}; const b=QUAL[brandOf(f.vals)]||QUAL.android; return {q:b.q,auto:true,n:jpegProfileFor(f).n}; }
+
+/* ---------- JPEG-Encoder mit echten Handy-Quantisierungstabellen ----------
+   Die Tabellen stammen aus unbearbeiteten Original-Fotos echter Geräte (Auswertung der DQT-Segmente):
+   apple     = iPhone 11 Pro Max, iOS 14.4.2 (2021); identisch bei iPhone 6 (2015)
+   samsung23 = Samsung One UI 5 (Galaxy S22/S23-Zeit), samsung24 = Samsung One UI 6 (Galaxy S24-Zeit)
+   google    = Pixel 6 Pro und Pixel 8a (identische Tabellen)
+   android   = OnePlus 8 (libjpeg Q95, wie Pixel 2, Nexus 4, Moto G, HTC One)
+   Alle Geräte nutzen 4:2:0 und die Standard-Huffman-Tabellen aus Anhang K. */
+const JP_Q={"apple":{"y":[1,1,1,1,1,1,2,1,1,2,3,2,2,2,3,4,3,3,3,3,4,5,4,4,4,4,4,5,6,5,5,5,5,5,5,6,6,6,6,6,6,6,6,7,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9],"c":[1,1,1,2,2,2,4,2,2,4,9,6,5,6,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9]},"samsung23":{"y":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,4,4,3,3,4,4,4,5,6,5,4,4,5,6,6,6,6,5,7,8,9,8,7,9,11,11,9,14,14,14,18,18,24],"c":[5,6,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,5,6,6,6,5,6,7,6,6,7,7,6,6,7,7,7,8,9,8,7,7,8,9,10,10,9,8,11,12,13,12,11,14,16,16,14,20,21,20,27,27,35]},"samsung24":{"y":[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,3,3,3,4,5,4,3,3,3,3,4,5,6,5,4,4,5,4,4,4,5,7,5,5,6,6,6,7,6,5,7,9,9,7,11,12,11,14,14,19],"c":[4,5,5,4,4,4,4,4,4,4,6,4,4,4,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,6,6,6,7,7,8,8,7,7,8,10,11,10,8,11,13,13,11,16,17,16,21,21,28]},"google":{"y":[3,3,4,2,5,1,1,4,4,1,1,4,4,4,1,3,4,4,4,3,3,6,6,5,5,5,6,7,8,8,7,7,7,7,7,8,7,8,9,8,8,9,10,10,9,9,11,9,7,8,11,11,11,10,12,12,12,9,10,12,11,11,11,10],"c":[3,3,3,5,4,5,7,6,6,7,11,8,8,8,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,11,11,11,11,12,12,12,12,12,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12]},"android":{"y":[2,1,1,1,1,1,2,1,1,1,2,2,2,2,2,4,3,2,2,2,2,5,4,4,3,4,6,5,6,6,6,5,6,6,6,7,9,8,6,7,9,7,6,6,8,11,8,9,10,10,10,10,10,6,8,11,12,11,10,12,9,10,10,10],"c":[2,2,2,2,2,2,5,3,3,5,10,7,6,7,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10]}};
+const JP_H={"dcY":[[0,1,5,1,1,1,1,1,1,0,0,0,0,0,0,0],[0,1,2,3,4,5,6,7,8,9,10,11]],"acY":[[0,2,1,3,3,2,4,3,5,5,4,4,0,0,1,125],[1,2,3,0,4,17,5,18,33,49,65,6,19,81,97,7,34,113,20,50,129,145,161,8,35,66,177,193,21,82,209,240,36,51,98,114,130,9,10,22,23,24,25,26,37,38,39,40,41,42,52,53,54,55,56,57,58,67,68,69,70,71,72,73,74,83,84,85,86,87,88,89,90,99,100,101,102,103,104,105,106,115,116,117,118,119,120,121,122,131,132,133,134,135,136,137,138,146,147,148,149,150,151,152,153,154,162,163,164,165,166,167,168,169,170,178,179,180,181,182,183,184,185,186,194,195,196,197,198,199,200,201,202,210,211,212,213,214,215,216,217,218,225,226,227,228,229,230,231,232,233,234,241,242,243,244,245,246,247,248,249,250]],"dcC":[[0,3,1,1,1,1,1,1,1,1,1,0,0,0,0,0],[0,1,2,3,4,5,6,7,8,9,10,11]],"acC":[[0,2,1,2,4,4,3,4,7,5,4,4,0,1,2,119],[0,1,2,3,17,4,5,33,49,6,18,65,81,7,97,113,19,34,50,129,8,20,66,145,161,177,193,9,35,51,82,240,21,98,114,209,10,22,36,52,225,37,241,23,24,25,26,38,39,40,41,42,53,54,55,56,57,58,67,68,69,70,71,72,73,74,83,84,85,86,87,88,89,90,99,100,101,102,103,104,105,106,115,116,117,118,119,120,121,122,130,131,132,133,134,135,136,137,138,146,147,148,149,150,151,152,153,154,162,163,164,165,166,167,168,169,170,178,179,180,181,182,183,184,185,186,194,195,196,197,198,199,200,201,202,210,211,212,213,214,215,216,217,218,226,227,228,229,230,231,232,233,234,242,243,244,245,246,247,248,249,250]]};
+
+const JP_ZZ=[0,1,8,16,9,2,3,10,17,24,32,25,18,11,4,5,12,19,26,33,40,48,41,34,27,20,13,6,7,14,21,28,35,42,49,56,57,50,43,36,29,22,15,23,30,37,44,51,58,59,52,45,38,31,39,46,53,60,61,54,47,55,62,63];
+const JP_INFO={apple:{n:'iPhone (Apple-Tabellen, belegt bis iPhone 11)',dri:'row'},samsung23:{n:'Galaxy S23-Zeit (One UI 5)',dri:'quarter'},samsung24:{n:'Galaxy S24-Zeit (One UI 6)',dri:'row'},google:{n:'Pixel 6/8 (Google Kamera)',dri:'none'},android:{n:'Android-Standard (libjpeg Q95)',dri:'none'}};
+function jpegProfileFor(f){ const p=presetForVals(f.vals); let k;
+  if(p){ if(p.g==='Apple') k='apple'; else if(p.g==='Samsung') k=(p.rel||'')<'2024'?'samsung23':'samsung24'; else if(p.g==='Google') k='google'; else k='android'; }
+  else { const b=brandOf(f.vals); k=b==='apple'?'apple':b==='samsung'?'samsung24':b==='google'?'google':'android'; }
+  return {key:k,...JP_INFO[k],q:JP_Q[k]}; }
+const JP_HT=(()=>{ const mk=(bits,vals)=>{ const code=new Uint16Array(256), len=new Uint8Array(256); let c=0,k=0; for(let l=1;l<=16;l++){ for(let i=0;i<bits[l-1];i++){ code[vals[k]]=c; len[vals[k]]=l; c++; k++; } c<<=1; } return {code,len,bits,vals}; }; return {dcY:mk(...JP_H.dcY),acY:mk(...JP_H.acY),dcC:mk(...JP_H.dcC),acC:mk(...JP_H.acC)}; })();
+const JP_AAN=[1,1.387039845,1.306562965,1.175875602,1,.785694958,.5411961,.275899379];
+function jpQuantDiv(zig){ const nat=new Array(64); for(let k=0;k<64;k++) nat[JP_ZZ[k]]=zig[k]; const d=new Float32Array(64); for(let r=0;r<8;r++) for(let c=0;c<8;c++) d[r*8+c]=1/(nat[r*8+c]*JP_AAN[r]*JP_AAN[c]*8); return d; }
+function jpFdct(b){ /* AAN, 8x8 in place (Zeilen, dann Spalten) */
+  for(let pass=0;pass<2;pass++){ const st=pass?8:1, sp=pass?1:8;
+    for(let i=0;i<8;i++){ const o=i*sp, d0=b[o],d1=b[o+st],d2=b[o+2*st],d3=b[o+3*st],d4=b[o+4*st],d5=b[o+5*st],d6=b[o+6*st],d7=b[o+7*st];
+      const t0=d0+d7,t7=d0-d7,t1=d1+d6,t6=d1-d6,t2=d2+d5,t5=d2-d5,t3=d3+d4,t4=d3-d4;
+      let t10=t0+t3,t13=t0-t3,t11=t1+t2,t12=t1-t2;
+      b[o]=t10+t11; b[o+4*st]=t10-t11; const z1=(t12+t13)*.707106781; b[o+2*st]=t13+z1; b[o+6*st]=t13-z1;
+      t10=t4+t5; t11=t5+t6; t12=t6+t7; const z5=(t10-t12)*.382683433, z2=.5411961*t10+z5, z4=1.306562965*t12+z5, z3=t11*.707106781, z11=t7+z3, z13=t7-z3;
+      b[o+5*st]=z13+z2; b[o+3*st]=z13-z2; b[o+st]=z11+z4; b[o+7*st]=z11-z4; } } }
+async function encodeJpegProfile(cv, prof, onTick){
+  const W=cv.width, H=cv.height, mw=Math.ceil(W/16), mh=Math.ceil(H/16), PW=mw*16, PH=16;
+  const qy=jpQuantDiv(prof.q.y), qc=jpQuantDiv(prof.q.c), total=mw*mh;
+  const dri=prof.dri==='row'?mw:prof.dri==='quarter'?Math.ceil(total/4):0;
+  const chunks=[]; let buf=new Uint8Array(1<<20), bp=0; const flushBuf=()=>{ chunks.push(buf.subarray(0,bp)); buf=new Uint8Array(1<<20); bp=0; };
+  let acc=0, nb=0; const putByte=v=>{ if(bp>=buf.length-2) flushBuf(); buf[bp++]=v; if(v===255) buf[bp++]=0; };
+  const putBits=(code,len)=>{ acc=(acc<<len)|code; nb+=len; while(nb>=8){ putByte((acc>>(nb-8))&255); nb-=8; } acc&=(1<<nb)-1; };
+  const flushBits=()=>{ if(nb>0){ putBits((1<<(8-nb))-1,8-nb); } acc=0; nb=0; };
+  const blk=new Float32Array(64), zq=new Int32Array(64);
+  const encBlock=(dcT,acT,qd,pred)=>{ jpFdct(blk); for(let k=0;k<64;k++){ const v=blk[JP_ZZ[k]]*qd[JP_ZZ[k]]; zq[k]=v<0?-Math.floor(-v+.5):Math.floor(v+.5); }
+    const diff=zq[0]-pred; let a=diff<0?-diff:diff, s=0; while(a){ s++; a>>=1; } putBits(dcT.code[s],dcT.len[s]); if(s) putBits(diff<0?(diff-1)&((1<<s)-1):diff,s);
+    let run=0; for(let k=1;k<64;k++){ const v=zq[k]; if(!v){ run++; continue; } while(run>15){ putBits(acT.code[0xF0],acT.len[0xF0]); run-=16; } let aa=v<0?-v:v, ss=0; while(aa){ ss++; aa>>=1; } const sym=(run<<4)|ss; putBits(acT.code[sym],acT.len[sym]); putBits(v<0?(v-1)&((1<<ss)-1):v,ss); run=0; }
+    if(run) putBits(acT.code[0],acT.len[0]); return zq[0]; };
+  const Y=new Float32Array(PW*16), Cb=new Float32Array(PW*16), Cr=new Float32Array(PW*16), cb2=new Float32Array((PW/2)*8), cr2=new Float32Array((PW/2)*8);
+  const ctx=cv.getContext('2d',{willReadFrequently:true}); let pY=0,pCb=0,pCr=0, mcu=0, rst=0;
+  for(let my=0;my<mh;my++){
+    const y0=my*16, h=Math.min(16,H-y0), img=ctx.getImageData(0,y0,W,h).data;
+    for(let y=0;y<16;y++){ const sy=Math.min(y,h-1); for(let x=0;x<PW;x++){ const sx=Math.min(x,W-1), i=(sy*W+sx)*4, r=img[i],g=img[i+1],b=img[i+2], o=y*PW+x;
+      Y[o]=.299*r+.587*g+.114*b-128; Cb[o]=-.168736*r-.331264*g+.5*b; Cr[o]=.5*r-.418688*g-.081312*b; } }
+    for(let y=0;y<8;y++) for(let x=0;x<PW/2;x++){ const a=(2*y)*PW+2*x, o=y*(PW/2)+x; cb2[o]=(Cb[a]+Cb[a+1]+Cb[a+PW]+Cb[a+PW+1])/4; cr2[o]=(Cr[a]+Cr[a+1]+Cr[a+PW]+Cr[a+PW+1])/4; }
+    for(let mx=0;mx<mw;mx++){
+      if(dri && mcu>0 && mcu%dri===0){ flushBits(); if(bp>=buf.length-2) flushBuf(); buf[bp++]=0xFF; buf[bp++]=0xD0+(rst++&7); pY=pCb=pCr=0; }
+      for(let by=0;by<2;by++) for(let bx=0;bx<2;bx++){ for(let r=0;r<8;r++) for(let c=0;c<8;c++) blk[r*8+c]=Y[(by*8+r)*PW+mx*16+bx*8+c]; pY=encBlock(JP_HT.dcY,JP_HT.acY,qy,pY); }
+      for(let r=0;r<8;r++) for(let c=0;c<8;c++) blk[r*8+c]=cb2[r*(PW/2)+mx*8+c]; pCb=encBlock(JP_HT.dcC,JP_HT.acC,qc,pCb);
+      for(let r=0;r<8;r++) for(let c=0;c<8;c++) blk[r*8+c]=cr2[r*(PW/2)+mx*8+c]; pCr=encBlock(JP_HT.dcC,JP_HT.acC,qc,pCr);
+      mcu++; }
+    if(my%12===11){ if(onTick) onTick(my/mh); await new Promise(r=>setTimeout(r,0)); } }
+  flushBits(); flushBuf();
+  const seg=(m,body)=>{ const o=new Uint8Array(4+body.length); o[0]=255; o[1]=m; o[2]=(body.length+2)>>8; o[3]=(body.length+2)&255; o.set(body,4); return o; };
+  const dq=(id,t)=>seg(0xDB,Uint8Array.from([id,...t]));
+  const ht=[]; for(const [tc,id,T] of [[0,0,JP_HT.dcY],[1,0,JP_HT.acY],[0,1,JP_HT.dcC],[1,1,JP_HT.acC]]) ht.push(...[(tc<<4)|id,...T.bits,...T.vals]);
+  const parts=[Uint8Array.of(255,0xD8), dq(0,prof.q.y), dq(1,prof.q.c), seg(0xC0,Uint8Array.of(8,H>>8,H&255,W>>8,W&255,3,1,0x22,0,2,0x11,1,3,0x11,1)), seg(0xC4,Uint8Array.from(ht))];
+  if(dri) parts.push(seg(0xDD,Uint8Array.of(dri>>8,dri&255)));
+  parts.push(seg(0xDA,Uint8Array.of(3,1,0x00,2,0x11,3,0x11,0,63,0)), ...chunks, Uint8Array.of(255,0xD9));
+  return cat(parts); }
+function readDqt(bytes){ const t={}; let i=2; while(i<bytes.length-4&&bytes[i]===255){ const m=bytes[i+1]; if(m===0xDA) break; const len=(bytes[i+2]<<8)|bytes[i+3]; if(m===0xDB){ let j=i+4; while(j<i+2+len){ t[bytes[j]&15]=Array.from(bytes.subarray(j+1,j+65)); j+=65; } } i+=2+len; } return t; }
+
 const toBlobP=(c,q)=>new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('JPEG-Erzeugung fehlgeschlagen')),'image/jpeg',q));
 async function renderFile(f){
   const strip=$('#stripAll').checked, xmp=$('#stripXmp').checked, fmtOn=$('#fmtOn').checked;
@@ -1512,7 +1577,9 @@ async function renderFile(f){
   ux.save(); ux.translate(o.W/2,o.H/2); ux.rotate((r.a||0)*Math.PI/180); ux.drawImage(src,-(r.x+r.w/2)*sc,-(r.y+r.h/2)*sc,tw,th); ux.restore();
   let st=up, orient=1;
   if(o.portrait&&$('#fRotate').checked){ st=mkCanvas(o.H,o.W); const sx=st.getContext('2d'); sx.translate(0,o.W); sx.rotate(-Math.PI/2); sx.drawImage(up,0,0); orient=6; }
-  const jpg=await (await toBlobP(st,qualityFor(f).q)).arrayBuffer();
+  const ql=qualityFor(f); let jpg=null;
+  if(ql.auto){ try{ jpg=await encodeJpegProfile(st,jpegProfileFor(f),pr=>{ $('#bSaveTxt').textContent='JPEG wird erzeugt … '+Math.round(pr*100)+' %'; }); }catch(e){ jpg=null; } }
+  if(!jpg) jpg=await (await toBlobP(st,ql.q)).arrayBuffer();
   const v={...f.vals, orientation:String(orient)};
   const out=rebuildJpeg(jpg, strip?null:buildExif(v,st.width,st.height), true, strip);
   if(img.close) img.close(); [...tmp,up,st,img].forEach(c=>{ if(c.width!==undefined&&c.getContext){ c.width=c.height=0; } });
@@ -1554,8 +1621,9 @@ function checkSaved(bytes,name){ /* liest die frisch erzeugte Datei wieder ein u
   const tags=readBack(bytes), keys=Object.keys(tags), v=tagsToVals(tags), strip=$('#stripAll').checked;
   const dev=[v.make,v.model].filter(Boolean).join(' '), dt=v.dateOriginal?fmtDate(v.dateOriginal):'', gps=nz(v.lat)&&nz(v.lon);
   const ok=strip?keys.length===0:keys.length>0;
+  const dq=readDqt(bytes), jk=Object.keys(JP_Q).find(k=>dq[0]&&dq[0].join()===JP_Q[k].y.join()&&dq[1]&&dq[1].join()===JP_Q[k].c.join()), jtxt=jk?` · JPEG-Tabellen: ${JP_INFO[jk].n}`:'';
   const st=$('#saveStat'); st.hidden=false; st.classList.toggle('bad',!ok);
-  st.innerHTML=ok?(strip?`<b>✓ Gespeichert: ${name}</b><br>Alle EXIF-Daten wurden entfernt (in der Datei geprüft).`:`<b>✓ Gespeichert: ${name}</b><br>${keys.length} EXIF-Einträge in der Datei geprüft · ${(bytes.length/1048576).toFixed(1).replace('.',',')} MB${dev?` · ${dev}`:''}${dt?` · ${dt}`:''} · GPS ${gps?'ja':'nein'}`):`<b>Achtung: ${name}</b><br>In der gespeicherten Datei wurden keine EXIF-Daten gefunden.`;
+  st.innerHTML=ok?(strip?`<b>✓ Gespeichert: ${name}</b><br>Alle EXIF-Daten wurden entfernt (in der Datei geprüft).`:`<b>✓ Gespeichert: ${name}</b><br>${keys.length} EXIF-Einträge in der Datei geprüft · ${(bytes.length/1048576).toFixed(1).replace('.',',')} MB${dev?` · ${dev}`:''}${dt?` · ${dt}`:''} · GPS ${gps?'ja':'nein'}${jtxt}`):`<b>Achtung: ${name}</b><br>In der gespeicherten Datei wurden keine EXIF-Daten gefunden.`;
   return ok; }
 function flashSaved(ok){ const b=$('#bSave'); b.classList.toggle('done',ok); $('#bSaveTxt').textContent=ok?'✓ EXIF geschrieben':'Fehler beim Schreiben'; clearTimeout(flashSaved._t); flashSaved._t=setTimeout(()=>{ b.classList.remove('done'); syncSaveLabel(); },2600); }
 function syncSaveLabel(){ $('#bSaveTxt').textContent=$('#stripAll').checked?'Metadaten entfernen & speichern':'EXIF ändern & speichern'; }
