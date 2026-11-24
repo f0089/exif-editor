@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="build" content="20261123001449">
+<meta name="build" content="20261124174548">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -407,11 +407,80 @@ table.ex td.new .was{display:none}
 .fc.gal::before{content:"";position:absolute;right:42px;top:12px;width:6px;height:6px;border-radius:50%;background:var(--accent)}
 .exleg{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);margin:0 0 2px!important;padding-top:2px}
 .exleg .gd{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}
+
+/* ---------- Karte „Größe & Format“ (eigenständig) ---------- */
+.rs{margin-top:20px;padding:20px;scroll-margin-top:12px}
+.rs-head{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin-bottom:16px}
+.rs-head h2{margin:0;font-size:18px;letter-spacing:-.015em;font-weight:750;display:flex;align-items:center;gap:9px}
+.rs-head h2 .i{color:var(--accent);width:21px;height:21px}
+.rs-head .muted{font-size:12.5px}
+.rs-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:start}
+@media (max-width:900px){.rs-body{grid-template-columns:minmax(0,1fr)}}
+.rs h3{margin:0 0 8px;font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:750;display:flex;align-items:center;gap:8px}
+.rs h3::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--accent)}
+.rs-sec{margin-bottom:18px}
+.rs-drop{height:300px;border:1.5px dashed color-mix(in srgb,var(--muted) 40%,var(--line));border-radius:18px;display:grid;place-items:center;text-align:center;color:var(--muted);cursor:pointer;background:radial-gradient(circle at 50% 40%,var(--soft),transparent 60%),var(--bg2);transition:.2s;padding:16px}
+.rs-drop:hover,.rs-drop.over{border-color:var(--accent);color:var(--text)}
+.rs-drop svg{width:54px;height:54px;color:var(--accent);display:block;margin:0 auto 8px}
+.rs-drop b{display:block;color:var(--text);font-size:15px;margin-bottom:2px}
+.rs-cvw{display:grid;place-items:center;padding:16px;border-radius:18px;background:var(--bg2);border:1px solid var(--line);min-height:200px}
+.rs-cvw.over{border-color:var(--accent)}
+.rs-cvw canvas{display:block;width:auto;height:auto;max-width:100%;max-height:min(62vh,540px);border-radius:3px;box-shadow:0 0 0 1px var(--line),0 12px 30px -10px rgba(0,0,0,.35);touch-action:none;background:repeating-conic-gradient(color-mix(in srgb,var(--muted) 22%,var(--panel)) 0 25%,var(--panel) 0 50%) 0 0/16px 16px}
+.rs-cvw canvas.drag{cursor:grab}.rs-cvw canvas.drag:active{cursor:grabbing}
+.rs-info{margin:10px 2px 0;font-size:12.5px;color:var(--muted);line-height:1.5}
+.rs-info b{color:var(--text);font-weight:700}
+.rs-zoom{display:flex;align-items:center;gap:10px;margin:8px 2px 0}
+.rs-zoom input[type=range]{flex:1}
+.rs-zoom span{font-size:12px;color:var(--muted);min-width:76px}
+.rs-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.rs-th{all:unset;box-sizing:border-box;position:relative;width:54px;height:54px;border-radius:12px;border:2px solid var(--line);overflow:hidden;cursor:pointer;background:var(--field)}
+.rs-th img{width:100%;height:100%;object-fit:cover;display:block}
+.rs-th.sel{border-color:var(--accent);box-shadow:0 0 0 3px var(--soft)}
+.rs-th .x{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:9px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;line-height:18px;text-align:center;opacity:0;transition:.15s}
+.rs-th:hover .x,.rs-th:focus-visible .x{opacity:1}
+.rs-th:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rs-pre{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:8px}
+.rs-t{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:14px;border:1.5px solid var(--line);background:var(--field);transition:border-color .15s,background .15s,box-shadow .15s;min-width:0}
+.rs-t:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.rs-t:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rs-t.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--field));box-shadow:0 0 0 3px var(--soft)}
+.rs-t .ic{flex:none;width:36px;height:36px;display:grid;place-items:center}
+.rs-t .ic i{display:block;border:2px solid var(--muted);border-radius:3px;background:color-mix(in srgb,var(--muted) 14%,transparent);transition:.15s}
+.rs-t.on .ic i{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.rs-t .ic svg{width:26px;height:26px;color:var(--muted)}.rs-t.on .ic svg{color:var(--accent)}
+.rs-t .tx{min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.rs-t b{font-size:13px;font-weight:720;letter-spacing:-.01em;white-space:nowrap}
+.rs-t small{font-size:11.5px;color:var(--muted)}
+.rs-t.star b::after{content:" ★";font-size:10px;color:var(--accent)}
+.rs-t{position:relative}
+.rs-dim{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rs-dim input[type=number]{width:92px}
+.rs-dim .x{color:var(--muted);font-weight:650}
+.rs-dim select{width:auto;min-width:74px}
+.rs-dim .btn{padding:0 10px;height:36px}
+.rs-calc{margin-top:8px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.rs-calc b{color:var(--text);font-weight:720}
+.rs-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.rs-line label{font-size:12.5px;color:var(--muted);min-width:42px}
+.rs-line input[type=number]{width:84px}
+.rs-hint{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.45}
+.rs-q{display:flex;align-items:center;gap:10px;margin-top:10px}
+.rs-q input[type=range]{flex:1}
+.rs-q output{min-width:44px;text-align:right;font-weight:700;font-size:13px}
+.rs-save{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.rs-save .btn.accent{height:54px}
+.rs-stat{font-size:12.5px;color:var(--muted);min-height:18px}
+.rs-stat.ok{color:var(--ok)}
+.rs [hidden]{display:none!important}
+@media (max-width:520px){.rs{padding:14px}.rs-pre{grid-template-columns:1fr 1fr}.rs-t{padding:8px;gap:8px}.rs-t .ic{width:28px;height:28px}.rs-t .ic i{transform:scale(.8)}.rs-t b{font-size:12.5px}}
+header .rslink{margin-left:12px;text-decoration:none;color:var(--accent);font-weight:650;cursor:pointer}
+header .rslink:hover{border-color:var(--accent)}
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 6.5h16M9 6.5V4.5h6v2M6.5 6.5l.9 13h9.2l.9-13M10 11v5M14 11v5"/></symbol>
+<symbol id="i-resize" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="12" height="12" rx="2.4"/><path d="M15.5 9.5h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2v-3M8 8l3.2 3.2M8 11.2V8h3.2"/></symbol>
 <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 <symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="16" rx="2.6"/><rect x="9" y="3" width="6" height="4" rx="1.3"/></symbol>
 <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="3"/><path d="M10.5 18.5h3"/></symbol>
@@ -442,7 +511,7 @@ table.ex td.new .was{display:none}
   <header>
     <div class="logo"><svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" aria-hidden="true"><defs><mask id="lgm" maskUnits="userSpaceOnUse" x="0" y="0" width="48" height="48"><circle cx="24" cy="24" r="17.6" fill="#fff"/><path d="M24.000 16.600L43.998 28.146 M30.409 20.300L30.409 43.392 M30.409 27.700L10.411 39.246 M24.000 31.400L4.002 19.854 M17.591 27.700L17.591 4.608 M17.591 20.300L37.589 8.754" stroke="#000" stroke-width="1.7" stroke-linecap="butt" fill="none"/></mask></defs><circle cx="24" cy="24" r="20.40" fill="none" stroke="#4f46e5" stroke-width="2.1"/><g mask="url(#lgm)"><path d="M30.409 20.300L41.400 26.646A17.6 17.6 0 0 1 30.409 40.392L30.409 27.700Z" fill="#8580f1"/><path d="M30.409 27.700L30.409 40.392A17.6 17.6 0 0 1 13.009 37.746L24.000 31.400Z" fill="#9893fc"/><path d="M24.000 31.400L13.009 37.746A17.6 17.6 0 0 1 6.600 21.354L17.591 27.700Z" fill="#3b33c4"/><path d="M17.591 27.700L6.600 21.354A17.6 17.6 0 0 1 17.591 7.608L17.591 20.300Z" fill="#4e46cf"/><path d="M17.591 20.300L17.591 7.608A17.6 17.6 0 0 1 34.991 10.254L24.000 16.600Z" fill="#6059da"/><path d="M24.000 16.600L34.991 10.254A17.6 17.6 0 0 1 41.400 26.646L30.409 20.300Z" fill="#736de6"/></g></svg></div>
     <div><h1>EXIF-Editor</h1><small>Foto-Metadaten ändern · alles lokal im Browser</small></div>
-    <span class="keys"><kbd>Strg</kbd>+<kbd>V</kbd> Foto einfügen · Ziehen = verschieben<br><kbd>R</kbd> würfeln · <kbd>S</kbd> speichern · <kbd>←</kbd><kbd>→</kbd> Foto</span>
+    <a class="chip rslink" href="#rsCard" id="rsLink">Größe &amp; Format ↓</a><span class="keys"><kbd>Strg</kbd>+<kbd>V</kbd> Foto einfügen · Ziehen = verschieben<br><kbd>R</kbd> würfeln · <kbd>S</kbd> speichern · <kbd>←</kbd><kbd>→</kbd> Foto</span>
   </header>
 
   <input id="fileIn" type="file" accept="image/*" multiple hidden>
@@ -590,6 +659,50 @@ table.ex td.new .was{display:none}
 
     </aside>
   </div>
+
+  <section class="card rs" id="rsCard" aria-labelledby="rsH">
+    <div class="rs-head"><h2 id="rsH"><svg class="i" aria-hidden="true"><use href="#i-resize"/></svg>Größe &amp; Format</h2><span class="muted">Eigene Funktion – unabhängig vom EXIF-Editor oben: Fotos auf eine feste Größe bringen oder umformatieren</span></div>
+    <input id="rsIn" type="file" accept="image/*" multiple hidden>
+    <div class="rs-body">
+      <div class="rs-left">
+        <div id="rsDrop" class="rs-drop" role="button" tabindex="0"><div>
+          <svg viewBox="0 0 76 76" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="10" y="12" width="56" height="52" rx="8"/><circle cx="26" cy="29" r="5"/><path d="M12 54l16-15 12 11 8-7 16 15"/></svg>
+          <b>Fotos für Größe &amp; Format wählen</b>hier hineinziehen oder klicken<br><span style="font-size:12px">JPEG, PNG, WebP – mehrere gleichzeitig möglich</span><br><button type="button" class="btn small" id="rsPaste0" style="margin-top:12px"><svg class="i" aria-hidden="true"><use href="#i-clip"/></svg>Aus Zwischenablage einfügen</button>
+        </div></div>
+        <div id="rsView" hidden>
+          <div class="rs-cvw" id="rsCvw"><canvas id="rsCv" aria-label="Vorschau des Ergebnisses"></canvas></div>
+          <div class="rs-info" id="rsInfo"></div>
+          <div class="rs-zoom" id="rsZoomRow"><span>Ausschnitt</span><input type="range" id="rsZoom" min="100" max="400" value="100" aria-label="Ausschnitt vergrößern"><span id="rsZoomV" style="text-align:right">100 %</span><button type="button" class="lnk" id="rsCenter">Zentrieren</button></div>
+          <div class="rs-strip" id="rsStrip"></div>
+          <div class="row" style="margin-top:12px;gap:8px"><button type="button" class="btn small" id="rsAdd"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Fotos hinzufügen</button><button type="button" class="btn small" id="rsPaste"><svg class="i" aria-hidden="true"><use href="#i-clip"/></svg>Einfügen</button></div>
+        </div>
+      </div>
+      <div class="rs-right">
+        <div class="rs-sec"><h3>Voreinstellung</h3><div class="rs-pre" id="rsPre"></div></div>
+        <div class="rs-sec" id="rsSizeSec"><h3>Maße</h3>
+          <div class="rs-dim" id="rsBox"><input type="number" id="rsW" min="1" step="any" inputmode="decimal" aria-label="Breite"><span class="x">×</span><input type="number" id="rsH2" min="1" step="any" inputmode="decimal" aria-label="Höhe"><select id="rsUnit" aria-label="Einheit"><option value="px">Pixel</option><option value="mm">mm</option><option value="cm">cm</option><option value="in">Zoll</option></select><button type="button" class="btn small" id="rsSwap" title="Breite und Höhe tauschen (Hoch-/Querformat)">⇄</button></div>
+          <div class="rs-dim" id="rsLongBox" hidden><input type="number" id="rsLong" min="16" max="8000" step="1" inputmode="numeric" aria-label="Längste Seite in Pixel"><span class="x">px an der längsten Seite</span></div>
+          <div class="rs-line"><label for="rsDpi">Auflösung</label><input type="number" id="rsDpi" min="36" max="1200" step="1" inputmode="numeric"><span class="muted" style="font-size:12.5px">dpi</span><span style="flex:1"></span><button type="button" class="lnk" data-dpi="72">72</button><button type="button" class="lnk" data-dpi="150">150</button><button type="button" class="lnk" data-dpi="300">300</button><button type="button" class="lnk" data-dpi="600">600</button></div>
+          <div class="rs-calc" id="rsCalc"></div>
+        </div>
+        <div class="rs-sec" id="rsFitSec"><h3>Anpassen</h3>
+          <div class="seg" id="rsMode"><button type="button" data-v="cover">Zuschneiden</button><button type="button" data-v="contain">Einpassen</button><button type="button" data-v="stretch">Strecken</button></div>
+          <div class="rs-hint" id="rsModeHint"></div>
+          <div class="rs-line" id="rsBgRow"><label>Rand</label><div class="seg" id="rsBg"><button type="button" data-v="#ffffff">Weiß</button><button type="button" data-v="#000000">Schwarz</button><button type="button" data-v="transparent">Transparent</button></div></div>
+        </div>
+        <div class="rs-sec"><h3>Dateiformat</h3>
+          <div class="seg" id="rsFmt"><button type="button" data-v="jpeg">JPEG</button><button type="button" data-v="png">PNG</button><button type="button" data-v="webp">WebP</button></div>
+          <div class="rs-q" id="rsQRow"><span class="muted" style="font-size:12.5px">Qualität</span><input type="range" id="rsQ" min="40" max="100" aria-label="Qualität"><output id="rsQV"></output></div>
+          <div class="rs-hint" id="rsFmtHint"></div>
+        </div>
+        <div class="rs-save">
+          <button type="button" class="btn accent" id="rsSave" disabled><svg class="i lg" aria-hidden="true"><use href="#i-resize"/></svg><span id="rsSaveTxt">Foto wählen</span></button>
+          <button type="button" class="btn" id="rsSaveAll" hidden></button>
+          <div class="rs-stat" id="rsStat" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -1837,6 +1950,252 @@ function snapSlider(f,v){ for(const p of snapPoints(f)){ if(lg(v,p.z)<.03){ if(l
 function newestIdx(){ const pl=plat.get(); const ok=p=>(pl==='ios'?p.g==='Apple':pl==='android'?p.g!=='Apple':true)&&tierOk(p); let i=PRESETS.findIndex(ok); if(i<0) i=PRESETS.findIndex(tierOk); return Math.max(0,i); }
 function platNewest(){ const f=files[cur]; if(!f) return; const pl=plat.get(), p=presetForVals(f.vals);
   if(!(p&&(pl==='both'||(pl==='ios')===(p.g==='Apple'))&&tierOk(p))) applyPreset(newestIdx()); }
+</script>
+<script>
+/* ============ Größe & Format (eigenständig, getrennt vom EXIF-Editor) ============ */
+(function(){
+const KEY='exifEditorResize1', MAXPX=8000;
+const PRE=[
+ {id:'p790',t:'790 × 980 px',s:'Bewerbung · Portal-Upload',w:790,h:980,unit:'px',dpi:72,mode:'cover',star:1},
+ {id:'p3545',t:'35 × 45 mm',s:'Passbild · 300 dpi',w:35,h:45,unit:'mm',dpi:300,mode:'cover',star:1},
+ {id:'p22',t:'2 × 2 Zoll',s:'US-Passfoto · 300 dpi',w:2,h:2,unit:'in',dpi:300,mode:'cover'},
+ {id:'ig1',t:'1080 × 1080',s:'Quadrat · Instagram',w:1080,h:1080,unit:'px',dpi:72,mode:'cover'},
+ {id:'ig2',t:'1080 × 1350',s:'Hochformat 4:5',w:1080,h:1350,unit:'px',dpi:72,mode:'cover'},
+ {id:'hd',t:'1920 × 1080',s:'Full HD · 16:9',w:1920,h:1080,unit:'px',dpi:72,mode:'cover'},
+ {id:'long',t:'1280 px',s:'Längste Seite · Web',kind:'long',long:1280,dpi:72},
+ {id:'custom',t:'Eigene Maße',s:'frei wählbar',custom:1}
+];
+const S={preset:'p790',kind:'box',w:790,h:980,unit:'px',dpi:72,long:1280,mode:'cover',bg:'#ffffff',fmt:'jpeg',q:92};
+try{ const o=JSON.parse(localStorage.getItem(KEY)||'{}'); for(const k in S) if(k in o && typeof o[k]===typeof S[k]) S[k]=o[k]; }catch(e){}
+if(!['px','mm','cm','in'].includes(S.unit)) S.unit='px';
+const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} };
+let files=[], cur=0, busy=false, estT=0, estSeq=0, customSel=false;
+const q=s=>document.querySelector(s);
+
+/* ---------- Maße ---------- */
+const toPx=(v,u,dpi)=>u==='px'?v:u==='mm'?v/25.4*dpi:u==='cm'?v/2.54*dpi:v*dpi;
+const toMm=(v,u,dpi)=>u==='px'?v/dpi*25.4:u==='mm'?v:u==='cm'?v*10:v*25.4;
+const fromMm=(mm,u,dpi)=>u==='px'?mm/25.4*dpi:u==='mm'?mm:u==='cm'?mm/10:mm/25.4;
+const clampPx=v=>Math.max(1,Math.min(MAXPX,Math.round(v)));
+const num=(x,d=2)=>String(+(+x).toFixed(d)).replace('.',',');
+function target(f){
+  if(S.kind==='long'){ const k=Math.min(1,S.long/Math.max(f.w,f.h)); return {W:Math.max(1,Math.round(f.w*k)),H:Math.max(1,Math.round(f.h*k)),mode:'stretch'}; }
+  return {W:clampPx(toPx(S.w,S.unit,S.dpi)),H:clampPx(toPx(S.h,S.unit,S.dpi)),mode:S.mode};
+}
+function geom(iw,ih,W,H,mode,fx,fy,zoom){
+  if(mode==='stretch') return {sx:0,sy:0,sw:iw,sh:ih,dx:0,dy:0,dw:W,dh:H,s:W/iw};
+  if(mode==='contain'){ const s=Math.min(W/iw,H/ih), dw=Math.max(1,Math.round(iw*s)), dh=Math.max(1,Math.round(ih*s));
+    return {sx:0,sy:0,sw:iw,sh:ih,dx:Math.round((W-dw)/2),dy:Math.round((H-dh)/2),dw,dh,s}; }
+  const s=Math.max(W/iw,H/ih)*zoom, sw=W/s, sh=H/s;
+  return {sx:(iw-sw)*fx,sy:(ih-sh)*fy,sw,sh,dx:0,dy:0,dw:W,dh:H,s};
+}
+/* hochwertiges Verkleinern: in Halbierungsschritten */
+function blit(ctx,src,sx,sy,sw,sh,dx,dy,dw,dh){
+  let cur=src,cx=sx,cy=sy,cw=sw,ch=sh;
+  while(cw/dw>2||ch/dh>2){
+    const nw=Math.max(dw,Math.ceil(cw/2)), nh=Math.max(dh,Math.ceil(ch/2));
+    const t=document.createElement('canvas'); t.width=nw; t.height=nh;
+    const c=t.getContext('2d'); c.imageSmoothingEnabled=true; c.imageSmoothingQuality='high';
+    c.drawImage(cur,cx,cy,cw,ch,0,0,nw,nh); cur=t; cx=0; cy=0; cw=nw; ch=nh;
+  }
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+  ctx.drawImage(cur,cx,cy,cw,ch,dx,dy,dw,dh);
+}
+/* zeichnet das Ergebnis auf cv (Größe W×H) aus src (Bild oder Canvas, srcW×srcH entspricht f.w×f.h) */
+function paint(cv,src,f,W,H,mode){
+  cv.width=W; cv.height=H; const ctx=cv.getContext('2d');
+  const needFill = S.fmt==='jpeg' || S.bg!=='transparent';
+  if(needFill){ ctx.fillStyle=(S.bg==='transparent'?'#ffffff':S.bg); ctx.fillRect(0,0,W,H); }
+  const g=geom(f.w,f.h,W,H,mode,f.fx,f.fy,f.zoom);
+  const k=(src.naturalWidth||src.width)/f.w;
+  blit(ctx,src,g.sx*k,g.sy*k,g.sw*k,g.sh*k,g.dx,g.dy,g.dw,g.dh);
+  return g;
+}
+
+/* ---------- Datei-Metadaten: DPI einbetten ---------- */
+let crcT=null;
+function crc32(b){ if(!crcT){ crcT=new Uint32Array(256); for(let n=0;n<256;n++){ let c=n; for(let k=0;k<8;k++) c=c&1?0xEDB88320^(c>>>1):c>>>1; crcT[n]=c>>>0; } }
+  let c=0xFFFFFFFF; for(let i=0;i<b.length;i++) c=crcT[(c^b[i])&255]^(c>>>8); return (c^0xFFFFFFFF)>>>0; }
+function jpegDpi(b,dpi){
+  if(b[0]!==0xFF||b[1]!==0xD8) return b;
+  const d=Math.max(1,Math.min(65535,Math.round(dpi)));
+  if(b[2]===0xFF&&b[3]===0xE0&&b[6]===0x4A&&b[7]===0x46&&b[8]===0x49&&b[9]===0x46&&b[10]===0){ b[13]=1; b[14]=d>>8; b[15]=d&255; b[16]=d>>8; b[17]=d&255; return b; }
+  const seg=[0xFF,0xE0,0,16,0x4A,0x46,0x49,0x46,0,1,1,1,d>>8,d&255,d>>8,d&255,0,0];
+  const o=new Uint8Array(b.length+seg.length); o.set(b.subarray(0,2),0); o.set(seg,2); o.set(b.subarray(2),2+seg.length); return o;
+}
+function pngDpi(b,dpi){
+  if(b.length<33||b[1]!==0x50) return b;
+  const ppm=Math.round(dpi/0.0254), c=new Uint8Array(21);
+  c.set([0,0,0,9,0x70,0x48,0x59,0x73],0);
+  const dv=new DataView(c.buffer); dv.setUint32(8,ppm); dv.setUint32(12,ppm); c[16]=1;
+  dv.setUint32(17,crc32(c.subarray(4,17)));
+  const out=new Uint8Array(b.length+21+0); // length(4)+type(4)+data(9)+crc(4)=21
+  out.set(b.subarray(0,33),0); out.set(c,33); out.set(b.subarray(33),54); return out;
+}
+function toBlobP(cv,type,qv){ return new Promise(r=>cv.toBlob(r,type,qv)); }
+async function encode(f){
+  const {W,H,mode}=target(f), cv=document.createElement('canvas');
+  paint(cv,f.img,f,W,H,mode);
+  const want=S.fmt==='png'?'image/png':S.fmt==='webp'?'image/webp':'image/jpeg';
+  const bl=await toBlobP(cv,want,S.fmt==='png'?undefined:S.q/100);
+  if(!bl) throw new Error('Bild konnte nicht erzeugt werden (zu groß?)');
+  let b=new Uint8Array(await bl.arrayBuffer()), type=bl.type||want;
+  if(type==='image/jpeg') b=jpegDpi(b,S.dpi); else if(type==='image/png') b=pngDpi(b,S.dpi);
+  return {bytes:b,type,W,H,ext:type==='image/png'?'png':type==='image/webp'?'webp':'jpg',fellBack:type!==want};
+}
+const baseName=n=>(n||'foto').replace(/\.[^.]+$/,'').replace(/[\\/:*?"<>|]+/g,'_')||'foto';
+const outName=(f,r)=>baseName(f.name)+'_'+r.W+'x'+r.H+'.'+r.ext;
+const fmtSize=n=>n>=1048576?num(n/1048576,1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
+
+/* ---------- Laden ---------- */
+async function addFiles(fl){
+  fl=[...fl].filter(x=>/^image\//.test(x.type)||/\.(jpe?g|png|webp|gif|bmp|avif|heic)$/i.test(x.name));
+  if(!fl.length){ toast('Keine Bilddatei erkannt',true); return; }
+  let ok=0;
+  for(const file of fl){
+    const url=URL.createObjectURL(file), img=new Image();
+    try{ img.src=url; await img.decode(); }catch(e){ URL.revokeObjectURL(url); toast(file.name+': Format wird vom Browser nicht gelesen',true); continue; }
+    const f={name:file.name,size:file.size,url,img,w:img.naturalWidth,h:img.naturalHeight,fx:.5,fy:.5,zoom:1,pv:null};
+    const pv=document.createElement('canvas'), k=Math.min(1,1400/Math.max(f.w,f.h));
+    pv.width=Math.max(1,Math.round(f.w*k)); pv.height=Math.max(1,Math.round(f.h*k)); blit(pv.getContext('2d'),img,0,0,f.w,f.h,0,0,pv.width,pv.height); f.pv=pv;
+    files.push(f); ok++;
+  }
+  if(ok){ cur=files.length-ok; render(); }
+}
+function removeFile(i){ const f=files[i]; if(!f) return; URL.revokeObjectURL(f.url); files.splice(i,1); if(cur>=files.length) cur=Math.max(0,files.length-1); render(); }
+
+/* ---------- Oberfläche ---------- */
+function matchPreset(){
+  for(const p of PRE){ if(p.custom) continue;
+    if(p.kind==='long'){ if(S.kind==='long'&&S.long===p.long&&S.dpi===p.dpi) return p.id; continue; }
+    if(S.kind==='box'&&S.w===p.w&&S.h===p.h&&S.unit===p.unit&&S.dpi===p.dpi) return p.id; }
+  return 'custom';
+}
+function tileIcon(p){
+  if(p.custom) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1.2-4.4L16.6 4.2a1.7 1.7 0 0 1 2.4 0l.8.8a1.7 1.7 0 0 1 0 2.4L8.4 18.8z M14.5 6.4l3.1 3.1"/></svg>';
+  if(p.kind==='long') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M4 12l3-3M4 12l3 3M20 12l-3-3M20 12l-3 3"/></svg>';
+  const r=p.w/p.h, m=30; let w=r>=1?m:m*r, h=r>=1?m/r:m; return '<i style="width:'+Math.round(w)+'px;height:'+Math.round(h)+'px"></i>';
+}
+function buildPresets(){
+  q('#rsPre').innerHTML=PRE.map(p=>'<button type="button" class="rs-t'+(p.star?' star':'')+'" data-id="'+p.id+'" aria-pressed="false"><span class="ic">'+tileIcon(p)+'</span><span class="tx"><b>'+p.t+'</b><small>'+p.s+'</small></span></button>').join('');
+  q('#rsPre').onclick=e=>{ const b=e.target.closest('.rs-t'); if(!b) return; const p=PRE.find(x=>x.id===b.dataset.id); if(!p) return;
+    customSel=!!p.custom;
+    if(p.custom){ S.preset='custom'; }
+    else { S.preset=p.id; S.dpi=p.dpi; if(p.kind==='long'){ S.kind='long'; S.long=p.long; } else { S.kind='box'; S.w=p.w; S.h=p.h; S.unit=p.unit; S.mode=p.mode; } }
+    if(p.custom&&S.kind==='long'){ S.kind='box'; }
+    save(); sync(); if(p.custom) q('#rsW').focus(); };
+}
+function sync(){
+  S.preset=customSel?'custom':matchPreset();
+  document.querySelectorAll('#rsPre .rs-t').forEach(b=>{ const on=b.dataset.id===S.preset; b.classList.toggle('on',on); b.setAttribute('aria-pressed',on); });
+  const long=S.kind==='long';
+  q('#rsBox').hidden=long; q('#rsLongBox').hidden=!long; q('#rsFitSec').hidden=long;
+  if(document.activeElement!==q('#rsW')) q('#rsW').value=num(S.w,3);
+  if(document.activeElement!==q('#rsH2')) q('#rsH2').value=num(S.h,3);
+  q('#rsUnit').value=S.unit;
+  if(document.activeElement!==q('#rsLong')) q('#rsLong').value=S.long;
+  if(document.activeElement!==q('#rsDpi')) q('#rsDpi').value=S.dpi;
+  q('#rsMode').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.mode));
+  q('#rsBg').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.bg));
+  q('#rsFmt').querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===S.fmt));
+  q('#rsBgRow').hidden=long||S.mode!=='contain';
+  q('#rsModeHint').textContent=S.mode==='cover'?'Das Foto füllt die ganze Fläche, überstehende Ränder werden abgeschnitten. Ausschnitt in der Vorschau mit der Maus verschieben, mit dem Regler oder Mausrad vergrößern.':S.mode==='contain'?'Das ganze Foto bleibt sichtbar, nicht ausgefüllte Flächen bekommen die Randfarbe.':'Das Foto wird exakt auf die Maße gezogen – Proportionen können verzerrt werden.';
+  const lossy=S.fmt!=='png';
+  q('#rsQRow').hidden=!lossy; q('#rsQ').value=S.q; q('#rsQV').textContent=S.q+' %';
+  q('#rsFmtHint').textContent=S.fmt==='jpeg'?'JPEG: kleinste Dateien, Auflösung (dpi) wird in die Datei geschrieben. Die Original-EXIF-Daten werden dabei nicht übernommen.':S.fmt==='png'?'PNG: verlustfrei, unterstützt Transparenz, Auflösung (dpi) wird eingebettet. Dateien sind meist deutlich größer.':'WebP: sehr kleine Dateien, unterstützt Transparenz. Die Auflösung (dpi) lässt sich in WebP nicht speichern; Safari kann WebP nicht erzeugen und nimmt dann PNG.';
+  calc(); renderView();
+}
+function calc(){
+  const el=q('#rsCalc'), f=files[cur];
+  if(S.kind==='long'){ el.innerHTML=f?'Ergebnis: <b>'+target(f).W+' × '+target(f).H+' px</b> (Seitenverhältnis bleibt, nicht vergrößert)':'Die längste Seite wird auf '+S.long+' px verkleinert, das Seitenverhältnis bleibt.'; return; }
+  const W=clampPx(toPx(S.w,S.unit,S.dpi)), H=clampPx(toPx(S.h,S.unit,S.dpi));
+  const wmm=toMm(S.w,S.unit,S.dpi), hmm=toMm(S.h,S.unit,S.dpi);
+  const over=toPx(S.w,S.unit,S.dpi)>MAXPX||toPx(S.h,S.unit,S.dpi)>MAXPX;
+  el.innerHTML='Ergebnis: <b>'+W+' × '+H+' px</b> · '+num(wmm,1)+' × '+num(hmm,1)+' mm bei '+S.dpi+' dpi'+(over?' <span style="color:var(--warn)">(auf '+MAXPX+' px begrenzt)</span>':'');
+}
+function renderView(){
+  const f=files[cur], has=!!f;
+  q('#rsDrop').hidden=has; q('#rsView').hidden=!has;
+  q('#rsSave').disabled=!has||busy;
+  const all=q('#rsSaveAll'); all.hidden=files.length<2; all.textContent='Alle '+files.length+' Fotos speichern';
+  if(!has){ q('#rsSaveTxt').textContent='Foto wählen'; q('#rsStat').textContent=''; q('#rsStat').classList.remove('ok'); return; }
+  const {W,H,mode}=target(f), cv=q('#rsCv');
+  const k=Math.min(1,700/Math.max(W,H)), pw=Math.max(1,Math.round(W*k)), ph=Math.max(1,Math.round(H*k));
+  paint(cv,f.pv,f,pw,ph,mode);
+  const drag=mode==='cover'; cv.classList.toggle('drag',drag);
+  q('#rsZoomRow').hidden=!drag; q('#rsZoom').value=Math.round(f.zoom*100); q('#rsZoomV').textContent=Math.round(f.zoom*100)+' %';
+  q('#rsInfo').innerHTML='<b>'+esc(f.name)+'</b> · Original '+f.w+' × '+f.h+' px'+(f.size?' · '+fmtSize(f.size):'')+(k<1?' · Vorschau verkleinert':' · Vorschau in Originalgröße');
+  q('#rsSaveTxt').textContent='Speichern · '+W+' × '+H+' px · '+(S.fmt==='jpeg'?'JPEG':S.fmt==='png'?'PNG':'WebP');
+  q('#rsStrip').innerHTML=files.map((x,i)=>'<button type="button" class="rs-th'+(i===cur?' sel':'')+'" data-i="'+i+'" title="'+esc(x.name)+'" aria-label="'+esc(x.name)+'"><img src="'+x.url+'" alt=""><span class="x" data-x="'+i+'" role="button" aria-label="Entfernen">×</span></button>').join('');
+  scheduleEst();
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function render(){ sync(); }
+/* Dateigröße im Hintergrund schätzen (echtes Kodieren) */
+function scheduleEst(){ clearTimeout(estT); const seq=++estSeq; const st=q('#rsStat'); st.classList.remove('ok'); st.textContent='Größe wird berechnet …';
+  estT=setTimeout(async()=>{ const f=files[cur]; if(!f) return; try{ const r=await encode(f); if(seq!==estSeq) return;
+      st.textContent='Fertige Datei: '+r.W+' × '+r.H+' px · '+S.dpi+(r.type==='image/webp'?' dpi (nicht in WebP gespeichert)':' dpi')+' · '+fmtSize(r.bytes.length)+(r.fellBack?' · WebP nicht unterstützt → PNG':''); st.classList.add('ok');
+    }catch(e){ if(seq===estSeq) st.textContent=e.message||'Fehler beim Berechnen'; } },280); }
+
+/* ---------- Ereignisse ---------- */
+function setNum(el,key,min,max){ el.addEventListener('input',()=>{ const v=parseFloat(String(el.value).replace(',','.')); if(!(v>0)) return; S[key]=Math.max(min,Math.min(max,v)); save(); sync(); }); }
+function init(){
+  buildPresets();
+  q('#rsW').addEventListener('input',e=>{ const v=parseFloat(String(e.target.value).replace(',','.')); if(!(v>0)) return; S.w=v; customSel=false; save(); sync(); });
+  q('#rsH2').addEventListener('input',e=>{ const v=parseFloat(String(e.target.value).replace(',','.')); if(!(v>0)) return; S.h=v; customSel=false; save(); sync(); });
+  setNum(q('#rsLong'),'long',16,MAXPX); setNum(q('#rsDpi'),'dpi',36,1200);
+  q('#rsLong').addEventListener('input',()=>{ S.long=Math.round(S.long); }); q('#rsDpi').addEventListener('input',()=>{ S.dpi=Math.round(S.dpi); });
+  q('#rsUnit').onchange=e=>{ const nu=e.target.value, ou=S.unit; if(nu===ou) return;
+    const conv=v=>{ if(ou!=='px'&&nu!=='px') return fromMm(toMm(v,ou,S.dpi),nu,S.dpi); return nu==='px'?Math.round(toPx(v,ou,S.dpi)):fromMm(toMm(v,ou,S.dpi),nu,S.dpi); };
+    S.w=+conv(S.w).toFixed(3); S.h=+conv(S.h).toFixed(3); S.unit=nu; save(); sync(); };
+  q('#rsSwap').onclick=()=>{ const t=S.w; S.w=S.h; S.h=t; save(); sync(); };
+  document.querySelectorAll('#rsCard [data-dpi]').forEach(b=>b.onclick=()=>{ S.dpi=+b.dataset.dpi; q('#rsDpi').value=S.dpi; save(); sync(); });
+  q('#rsMode').onclick=e=>{ const b=e.target.closest('button'); if(b){ S.mode=b.dataset.v; save(); sync(); } };
+  q('#rsBg').onclick=e=>{ const b=e.target.closest('button'); if(b){ S.bg=b.dataset.v; save(); sync(); } };
+  q('#rsFmt').onclick=e=>{ const b=e.target.closest('button'); if(b){ S.fmt=b.dataset.v; save(); sync(); } };
+  q('#rsQ').addEventListener('input',e=>{ S.q=+e.target.value; save(); q('#rsQV').textContent=S.q+' %'; scheduleEst(); });
+  q('#rsZoom').addEventListener('input',e=>{ const f=files[cur]; if(!f) return; f.zoom=+e.target.value/100; renderView(); });
+  q('#rsCenter').onclick=()=>{ const f=files[cur]; if(!f) return; f.fx=.5; f.fy=.5; f.zoom=1; renderView(); };
+  q('#rsStrip').onclick=e=>{ const x=e.target.closest('[data-x]'); if(x){ e.stopPropagation(); removeFile(+x.dataset.x); return; } const b=e.target.closest('.rs-th'); if(b){ cur=+b.dataset.i; sync(); } };
+  /* Ausschnitt ziehen / Mausrad */
+  const cv=q('#rsCv'); let dr=null;
+  cv.addEventListener('pointerdown',e=>{ const f=files[cur]; if(!f||target(f).mode!=='cover') return; dr={x:e.clientX,y:e.clientY,fx:f.fx,fy:f.fy}; cv.setPointerCapture(e.pointerId); });
+  cv.addEventListener('pointermove',e=>{ if(!dr) return; const f=files[cur]; if(!f) return; const {W,H}=target(f), r=cv.getBoundingClientRect(), pr=cv.width/r.width;
+    const g=geom(f.w,f.h,W,H,'cover',0,0,f.zoom), k=cv.width/W; const dxs=(e.clientX-dr.x)*pr/(k*g.s), dys=(e.clientY-dr.y)*pr/(k*g.s);
+    const mx=f.w-g.sw, my=f.h-g.sh; const sx0=mx*dr.fx-dxs, sy0=my*dr.fy-dys;
+    f.fx=mx>1e-6?Math.max(0,Math.min(1,sx0/mx)):.5; f.fy=my>1e-6?Math.max(0,Math.min(1,sy0/my)):.5; renderViewLight(); });
+  const end=()=>{ if(dr){ dr=null; scheduleEst(); } }; cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end);
+  cv.addEventListener('wheel',e=>{ const f=files[cur]; if(!f||target(f).mode!=='cover') return; e.preventDefault(); f.zoom=Math.max(1,Math.min(4,f.zoom*(e.deltaY<0?1.08:1/1.08))); renderView(); },{passive:false});
+  /* Laden */
+  const pick=()=>q('#rsIn').click();
+  q('#rsDrop').onclick=e=>{ if(e.target.closest('button')) return; pick(); };
+  q('#rsDrop').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } };
+  q('#rsAdd').onclick=pick;
+  q('#rsIn').onchange=e=>{ addFiles(e.target.files); e.target.value=''; };
+  const paste=async()=>{ try{ const items=await navigator.clipboard.read(), fl=[]; for(const it of items){ const t=it.types.find(x=>/^image\//.test(x)); if(t){ const bl=await it.getType(t); fl.push(new File([bl],'einfuegen.'+(t.split('/')[1]||'png'),{type:t})); } }
+      if(fl.length){ await addFiles(fl); } else toast('In der Zwischenablage ist kein Bild',true); }catch(e){ toast('Einfügen hier nicht möglich – Foto per Klick wählen oder hineinziehen',true); } };
+  q('#rsPaste').onclick=paste; q('#rsPaste0').onclick=e=>{ e.stopPropagation(); paste(); };
+  const card=q('#rsCard');
+  ['dragenter','dragover'].forEach(t=>card.addEventListener(t,e=>{ if(e.dataTransfer&&[...(e.dataTransfer.types||[])].includes('Files')){ e.preventDefault(); e.stopPropagation(); q('#rsDrop').classList.add('over'); q('#rsCvw').classList.add('over'); } }));
+  card.addEventListener('dragleave',e=>{ if(!card.contains(e.relatedTarget)){ q('#rsDrop').classList.remove('over'); q('#rsCvw').classList.remove('over'); } });
+  card.addEventListener('drop',e=>{ if(!(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length)) return; e.preventDefault(); e.stopPropagation(); q('#rsDrop').classList.remove('over'); q('#rsCvw').classList.remove('over'); addFiles(e.dataTransfer.files); });
+  /* Speichern */
+  q('#rsSave').onclick=async()=>{ const f=files[cur]; if(!f||busy) return; busy=true; q('#rsSave').disabled=true; const st=q('#rsStat'); st.classList.remove('ok'); st.textContent='Wird erzeugt …';
+    try{ const r=await encode(f); await saveBlob(outName(f,r),r.bytes,r.type); st.textContent='Gespeichert: '+outName(f,r)+' · '+r.W+' × '+r.H+' px · '+fmtSize(r.bytes.length); st.classList.add('ok'); toast('Gespeichert: '+r.W+' × '+r.H+' px'); }
+    catch(e){ st.textContent=e.message||'Fehler'; toast(e.message||'Fehler beim Speichern',true); }
+    busy=false; q('#rsSave').disabled=false; };
+  q('#rsSaveAll').onclick=async()=>{ if(busy) return; busy=true; q('#rsSave').disabled=true; const st=q('#rsStat'); let n=0;
+    try{ for(let i=0;i<files.length;i++){ st.classList.remove('ok'); st.textContent='Foto '+(i+1)+' von '+files.length+' …'; const r=await encode(files[i]); await saveBlob(outName(files[i],r),r.bytes,r.type); n++; await new Promise(r=>setTimeout(r,300)); }
+      st.textContent=n+' Fotos gespeichert'; st.classList.add('ok'); toast(n+' Fotos gespeichert'); }
+    catch(e){ st.textContent=e.message||'Fehler'; toast(e.message||'Fehler',true); }
+    busy=false; q('#rsSave').disabled=!files.length; };
+  q('#rsLink').addEventListener('click',e=>{ e.preventDefault(); q('#rsCard').scrollIntoView({behavior:'smooth',block:'start'}); });
+  sync();
+}
+function renderViewLight(){ const f=files[cur]; if(!f) return; const {W,H,mode}=target(f), cv=q('#rsCv'); paint(cv,f.pv,f,cv.width,cv.height,mode); }
+window.__rs={S,files:()=>files,encode,target,addFiles};
+init();
+})();
 </script>
 <style>@media (display-mode:standalone){body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}}</style>
 <script>
