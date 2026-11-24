@@ -6,7 +6,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="shortcut icon" href="favicon.ico">
-<meta name="build" content="20261124174548">
+<meta name="build" content="20261124182100">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#000000">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -409,19 +409,20 @@ table.ex td.new .was{display:none}
 .exleg .gd{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:none}
 
 /* ---------- Karte „Größe & Format“ (eigenständig) ---------- */
-.rs{margin-top:20px;padding:20px;scroll-margin-top:12px}
+.rs{padding:20px}
 .rs-head{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;margin-bottom:16px}
 .rs-head h2{margin:0;font-size:18px;letter-spacing:-.015em;font-weight:750;display:flex;align-items:center;gap:9px}
 .rs-head h2 .i{color:var(--accent);width:21px;height:21px}
 .rs-head .muted{font-size:12.5px}
+.rs-drop>div>svg{width:72px;height:72px}
 .rs-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:start}
 @media (max-width:900px){.rs-body{grid-template-columns:minmax(0,1fr)}}
 .rs h3{margin:0 0 8px;font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:750;display:flex;align-items:center;gap:8px}
 .rs h3::before{content:"";width:6px;height:6px;border-radius:2px;background:var(--accent)}
 .rs-sec{margin-bottom:18px}
-.rs-drop{height:300px;border:1.5px dashed color-mix(in srgb,var(--muted) 40%,var(--line));border-radius:18px;display:grid;place-items:center;text-align:center;color:var(--muted);cursor:pointer;background:radial-gradient(circle at 50% 40%,var(--soft),transparent 60%),var(--bg2);transition:.2s;padding:16px}
+.rs-drop{height:min(62vh,520px);min-height:340px;border:1.5px dashed color-mix(in srgb,var(--muted) 40%,var(--line));border-radius:18px;display:grid;place-items:center;text-align:center;color:var(--muted);cursor:pointer;background:radial-gradient(circle at 50% 40%,var(--soft),transparent 60%),var(--bg2);transition:.2s;padding:16px}
 .rs-drop:hover,.rs-drop.over{border-color:var(--accent);color:var(--text)}
-.rs-drop svg{width:54px;height:54px;color:var(--accent);display:block;margin:0 auto 8px}
+.rs-drop>div>svg{color:var(--accent);display:block;margin:0 auto 10px}
 .rs-drop b{display:block;color:var(--text);font-size:15px;margin-bottom:2px}
 .rs-cvw{display:grid;place-items:center;padding:16px;border-radius:18px;background:var(--bg2);border:1px solid var(--line);min-height:200px}
 .rs-cvw.over{border-color:var(--accent)}
@@ -472,9 +473,18 @@ table.ex td.new .was{display:none}
 .rs-stat{font-size:12.5px;color:var(--muted);min-height:18px}
 .rs-stat.ok{color:var(--ok)}
 .rs [hidden]{display:none!important}
-@media (max-width:520px){.rs{padding:14px}.rs-pre{grid-template-columns:1fr 1fr}.rs-t{padding:8px;gap:8px}.rs-t .ic{width:28px;height:28px}.rs-t .ic i{transform:scale(.8)}.rs-t b{font-size:12.5px}}
-header .rslink{margin-left:12px;text-decoration:none;color:var(--accent);font-weight:650;cursor:pointer}
-header .rslink:hover{border-color:var(--accent)}
+@media (max-width:520px){.rs-drop{height:300px;min-height:0}.rs{padding:14px}.rs-pre{grid-template-columns:1fr 1fr}.rs-t{padding:8px;gap:8px}.rs-t .ic{width:28px;height:28px}.rs-t .ic i{transform:scale(.8)}.rs-t b{font-size:12.5px}}
+.tabs{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+.tabs button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:11px;padding:10px 16px 10px 13px;border-radius:16px;border:1.5px solid var(--line);background:var(--panel);color:var(--muted);transition:border-color .15s,background .15s,color .15s,box-shadow .15s;box-shadow:var(--shadow)}
+.tabs button:hover{color:var(--text);border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabs button[aria-selected=true]{color:var(--text);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--panel));box-shadow:0 0 0 3px var(--soft)}
+.tabs .i{width:21px;height:21px;flex:none}
+.tabs button[aria-selected=true] .i{color:var(--accent)}
+.tabs span{display:flex;flex-direction:column;line-height:1.2;font-weight:720;font-size:14px;letter-spacing:-.01em}
+.tabs small{font-size:11.5px;font-weight:500;color:var(--muted);margin-top:2px}
+@media (max-width:520px){.tabs{gap:6px}.tabs button{flex:1 1 0;padding:9px 10px;gap:8px;min-width:0}.tabs small{display:none}.tabs span{font-size:13px}}
+#vExif[hidden],#vSize[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -511,9 +521,16 @@ header .rslink:hover{border-color:var(--accent)}
   <header>
     <div class="logo"><svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision" aria-hidden="true"><defs><mask id="lgm" maskUnits="userSpaceOnUse" x="0" y="0" width="48" height="48"><circle cx="24" cy="24" r="17.6" fill="#fff"/><path d="M24.000 16.600L43.998 28.146 M30.409 20.300L30.409 43.392 M30.409 27.700L10.411 39.246 M24.000 31.400L4.002 19.854 M17.591 27.700L17.591 4.608 M17.591 20.300L37.589 8.754" stroke="#000" stroke-width="1.7" stroke-linecap="butt" fill="none"/></mask></defs><circle cx="24" cy="24" r="20.40" fill="none" stroke="#4f46e5" stroke-width="2.1"/><g mask="url(#lgm)"><path d="M30.409 20.300L41.400 26.646A17.6 17.6 0 0 1 30.409 40.392L30.409 27.700Z" fill="#8580f1"/><path d="M30.409 27.700L30.409 40.392A17.6 17.6 0 0 1 13.009 37.746L24.000 31.400Z" fill="#9893fc"/><path d="M24.000 31.400L13.009 37.746A17.6 17.6 0 0 1 6.600 21.354L17.591 27.700Z" fill="#3b33c4"/><path d="M17.591 27.700L6.600 21.354A17.6 17.6 0 0 1 17.591 7.608L17.591 20.300Z" fill="#4e46cf"/><path d="M17.591 20.300L17.591 7.608A17.6 17.6 0 0 1 34.991 10.254L24.000 16.600Z" fill="#6059da"/><path d="M24.000 16.600L34.991 10.254A17.6 17.6 0 0 1 41.400 26.646L30.409 20.300Z" fill="#736de6"/></g></svg></div>
     <div><h1>EXIF-Editor</h1><small>Foto-Metadaten ändern · alles lokal im Browser</small></div>
-    <a class="chip rslink" href="#rsCard" id="rsLink">Größe &amp; Format ↓</a><span class="keys"><kbd>Strg</kbd>+<kbd>V</kbd> Foto einfügen · Ziehen = verschieben<br><kbd>R</kbd> würfeln · <kbd>S</kbd> speichern · <kbd>←</kbd><kbd>→</kbd> Foto</span>
+    <span class="keys" id="keysTxt"><kbd>Strg</kbd>+<kbd>V</kbd> Foto einfügen · Ziehen = verschieben<br><kbd>R</kbd> würfeln · <kbd>S</kbd> speichern · <kbd>←</kbd><kbd>→</kbd> Foto</span>
   </header>
 
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Funktion wählen">
+    <button type="button" role="tab" data-t="exif" aria-selected="true"><svg class="i" aria-hidden="true"><use href="#i-doc"/></svg><span>EXIF-Editor<small>Metadaten von Handyfotos ändern</small></span></button>
+    <button type="button" role="tab" data-t="size" aria-selected="false"><svg class="i" aria-hidden="true"><use href="#i-resize"/></svg><span>Größe &amp; Format<small>Auflösung anpassen, umformatieren</small></span></button>
+  </nav>
+
+
+  <div id="vExif">
   <input id="fileIn" type="file" accept="image/*" multiple hidden>
 
   <div class="main">
@@ -659,9 +676,11 @@ header .rslink:hover{border-color:var(--accent)}
 
     </aside>
   </div>
+  </div><!-- /vExif -->
 
+  <div id="vSize" hidden>
   <section class="card rs" id="rsCard" aria-labelledby="rsH">
-    <div class="rs-head"><h2 id="rsH"><svg class="i" aria-hidden="true"><use href="#i-resize"/></svg>Größe &amp; Format</h2><span class="muted">Eigene Funktion – unabhängig vom EXIF-Editor oben: Fotos auf eine feste Größe bringen oder umformatieren</span></div>
+    <div class="rs-head"><h2 id="rsH"><svg class="i" aria-hidden="true"><use href="#i-resize"/></svg>Größe &amp; Format</h2><span class="muted">Eigene Funktion mit eigenem Upload – unabhängig vom EXIF-Editor: Fotos auf eine feste Größe bringen oder umformatieren</span></div>
     <input id="rsIn" type="file" accept="image/*" multiple hidden>
     <div class="rs-body">
       <div class="rs-left">
@@ -703,6 +722,7 @@ header .rslink:hover{border-color:var(--accent)}
       </div>
     </div>
   </section>
+  </div><!-- /vSize -->
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script>
@@ -1893,7 +1913,7 @@ $('#bCopy').onclick=()=>{ const f=files[cur]; if(!f||busy) return;
   navigator.clipboard.write([new ClipboardItem({'image/png':png})]).then(()=>toast('Bild kopiert (die Zwischenablage speichert keine EXIF-Daten – dafür „Speichern“)')).catch(e=>toast(e&&e.name==='NotAllowedError'?'Kopieren ist hier nicht erlaubt – bitte „Speichern“ nutzen':'Kopieren nicht möglich: '+(e&&e.message||e),true)).finally(()=>{ busy=false; b.disabled=false; b.innerHTML=old; }); };
 
 /* ---------- Einfügen aus der Zwischenablage ---------- */
-document.addEventListener('paste',e=>{ if(['input','textarea','select'].includes((e.target.tagName||'').toLowerCase())) return;
+document.addEventListener('paste',e=>{ if(document.body.dataset.view==='size') return; if(['input','textarea','select'].includes((e.target.tagName||'').toLowerCase())) return;
   const fl=[...(e.clipboardData?.files||[])].filter(f=>/^image\//.test(f.type));
   if(fl.length){ e.preventDefault(); addFiles(fl); toast(`${fl.length} Bild${fl.length>1?'er':''} eingefügt`); } else toast('In der Zwischenablage ist kein Bild',true); });
 $('#pasteBtn2').onclick=e=>{ e.stopPropagation(); $('#pasteBtn').click(); };
@@ -1903,7 +1923,7 @@ $('#pasteBtn').onclick=async()=>{ try{ const items=await navigator.clipboard.rea
   }catch(e){ toast('Direkt nicht möglich – bitte Strg+V (am Mac Cmd+V) drücken',true); } };
 
 /* ---------- Tastatur, Hinzufügen ---------- */
-document.addEventListener('keydown',e=>{ if(e.ctrlKey||e.metaKey||e.altKey) return; if(['input','select','textarea'].includes((e.target.tagName||'').toLowerCase())) return;
+document.addEventListener('keydown',e=>{ if(document.body.dataset.view==='size') return; if(e.ctrlKey||e.metaKey||e.altKey) return; if(['input','select','textarea'].includes((e.target.tagName||'').toLowerCase())) return;
   const k=e.key.toLowerCase();
   if(e.key==='Delete'||e.key==='Backspace'){ if(files[cur]){ e.preventDefault(); removeCurrent(); } }
   else if(k==='r'){ e.preventDefault(); $('#bRand').click(); } else if(k==='s'){ e.preventDefault(); $('#bSave').click(); }
@@ -1914,7 +1934,7 @@ $('#empty').onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault();
 fin.onchange=()=>{ addFiles([...fin.files]); fin.value=''; };
 ['dragenter','dragover'].forEach(t=>document.addEventListener(t,e=>{ e.preventDefault(); $('#empty').classList.add('over'); $('#addBtn').classList.add('over'); }));
 ['dragleave','drop'].forEach(t=>document.addEventListener(t,e=>{ e.preventDefault(); if(t==='drop'||e.target===document.documentElement){ $('#empty').classList.remove('over'); $('#addBtn').classList.remove('over'); } }));
-document.addEventListener('drop',e=>{ if(e.dataTransfer?.files?.length) addFiles([...e.dataTransfer.files]); });
+document.addEventListener('drop',e=>{ if(document.body.dataset.view==='size') return; if(e.dataTransfer?.files?.length) addFiles([...e.dataTransfer.files]); });
 syncOpts(); render();
 
 /* ---------- stufenlose Drehung ---------- */
@@ -2189,8 +2209,32 @@ function init(){
       st.textContent=n+' Fotos gespeichert'; st.classList.add('ok'); toast(n+' Fotos gespeichert'); }
     catch(e){ st.textContent=e.message||'Fehler'; toast(e.message||'Fehler',true); }
     busy=false; q('#rsSave').disabled=!files.length; };
-  q('#rsLink').addEventListener('click',e=>{ e.preventDefault(); q('#rsCard').scrollIntoView({behavior:'smooth',block:'start'}); });
+  /* ---------- Ansichten (Reiter) ---------- */
+  const KEYS={exif:null,size:'<kbd>Strg</kbd>+<kbd>V</kbd> Foto einfügen<br>Fotos hierher ziehen · Ausschnitt mit der Maus verschieben'};
+  const keysEl=q('#keysTxt'); KEYS.exif=keysEl.innerHTML;
+  function setView(v,push){
+    if(v!=='size') v='exif';
+    document.body.dataset.view=v;
+    q('#vExif').hidden=v!=='exif'; q('#vSize').hidden=v!=='size';
+    document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===v));
+    keysEl.innerHTML=KEYS[v]; document.title=v==='size'?'Größe & Format – EXIF-Editor':'EXIF-Editor';
+    try{ localStorage.setItem('exifEditorView',v); }catch(e){}
+    if(push!==false){ try{ history.replaceState(null,'',v==='size'?'#groesse':location.pathname+location.search); }catch(e){} }
+    if(v==='size') renderView();
+    window.scrollTo(0,0);
+  }
+  q('#tabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) setView(b.dataset.t); });
+  q('#tabs').addEventListener('keydown',e=>{ if(e.key==='ArrowRight'||e.key==='ArrowLeft'){ const bs=[...document.querySelectorAll('#tabs button')], i=bs.indexOf(document.activeElement); if(i<0) return; const n=bs[(i+(e.key==='ArrowRight'?1:bs.length-1))%bs.length]; n.focus(); setView(n.dataset.t); } });
+  /* Einfügen / Ziehen auf die ganze Seite gehört in dieser Ansicht nur zu „Größe & Format“ */
+  document.addEventListener('paste',e=>{ if(document.body.dataset.view!=='size') return; if(['input','textarea','select'].includes((e.target.tagName||'').toLowerCase())) return;
+    const fl=[...(e.clipboardData?.files||[])].filter(f=>/^image\//.test(f.type)); if(fl.length){ e.preventDefault(); addFiles(fl); } else toast('In der Zwischenablage ist kein Bild',true); });
+  document.addEventListener('drop',e=>{ if(document.body.dataset.view!=='size') return; if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length){ e.preventDefault(); addFiles(e.dataTransfer.files); } });
+  let v0='exif'; try{ v0=localStorage.getItem('exifEditorView')==='size'?'size':'exif'; }catch(e){}
+  if(location.hash==='#groesse') v0='size'; else if(location.hash==='#exif') v0='exif';
+  window.__rs.setView=setView;
   sync();
+  setView(v0,false);
+  window.addEventListener('hashchange',()=>setView(location.hash==='#groesse'?'size':'exif',false));
 }
 function renderViewLight(){ const f=files[cur]; if(!f) return; const {W,H,mode}=target(f), cv=q('#rsCv'); paint(cv,f.pv,f,cv.width,cv.height,mode); }
 window.__rs={S,files:()=>files,encode,target,addFiles};
@@ -2208,7 +2252,7 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){ addEven
     b.style.cssText='border:0;border-radius:9px;padding:7px 12px;font:700 12.5px system-ui,sans-serif;background:#fff;color:#4f46e5;cursor:pointer'; b.onclick=()=>location.reload(); d.appendChild(b); document.body.appendChild(d); }
   async function check(){ if(shown) return; try{ const r=await fetch('version.txt?'+Date.now(),{cache:'no-store'}); if(!r.ok) return; const v=(await r.text()).trim(); if(!v||v===mine) return; shown=true;
       let last=0; try{ last=+sessionStorage.getItem('ee_rl')||0; }catch(e){}
-      if(typeof files!=='undefined' && !files.length && Date.now()-last>90000){ try{ sessionStorage.setItem('ee_rl',String(Date.now())); }catch(e){} location.reload(); } else banner(); }catch(e){} }
+      if(typeof files!=='undefined' && !files.length && !(window.__rs&&window.__rs.files().length) && Date.now()-last>90000){ try{ sessionStorage.setItem('ee_rl',String(Date.now())); }catch(e){} location.reload(); } else banner(); }catch(e){} }
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden) check(); }); addEventListener('focus',check); addEventListener('online',check); setInterval(check,120000); setTimeout(check,4000);
 })();
 </script>
